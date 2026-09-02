@@ -2,109 +2,140 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Scorpions V002 - 5 Teams LIVE</title>
+<title>Scorpions - Spielwoche Maske - 5 Teams</title>
 <style>
-:root{--ink:#0B0E13;--surface:#141A22;--surface2:#1B232E;--line:#27313F;--red:#b30000;--muted:#8A97A6;--font:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-*{box-sizing:border-box}body{margin:0;background:var(--ink);color:#fff;font-family:var(--font);padding:18px}
-.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}.top img{width:44px;height:44px;background:#fff;border-radius:8px;padding:3px}
-h1{margin:0;font-size:19px}.badge{background:#b30000;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:800}
-.layout{display:grid;grid-template-columns:340px 1fr;gap:18px}@media(max-width:900px){.layout{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
-label{font-size:11px;color:var(--muted);font-weight:700;margin:10px 0 4px;display:block;text-transform:uppercase;letter-spacing:.08em}
-select{width:100%;background:var(--surface2);border:1px solid var(--line);color:#fff;border-radius:9px;padding:9px}
-.seg{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:3px}
-.seg button{flex:1;background:transparent;border:0;color:var(--muted);font-weight:800;font-size:12px;padding:8px;border-radius:7px;cursor:pointer}
-.seg button.active{background:var(--red);color:#fff}
-.info{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}.info b{color:#fff}
-.btn{width:100%;padding:10px;border-radius:9px;border:0;font-weight:800;cursor:pointer;margin-top:8px}
-.btn-primary{background:var(--red);color:#fff}.btn-ghost{background:var(--surface2);color:#fff;border:1px solid var(--line)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:12px}
+:root{--ink:#0B0E13;--surface:#141A22;--surface2:#1B232E;--line:#27313F;--red:#b30000;--muted:#8A97A6}
+*{box-sizing:border-box}body{margin:0;background:var(--ink);color:#fff;font-family:system-ui,Segoe UI,Roboto;padding:14px}
+.top{display:flex;gap:10px;align-items:center;margin-bottom:12px}.top img{width:42px;height:42px;background:#fff;border-radius:8px;padding:3px}
+.badge{background:#b30000;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:800}
+.layout{display:grid;grid-template-columns:360px 1fr;gap:14px}@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+label{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin:8px 0 3px;display:block}
+select{width:100%;background:var(--surface2);border:1px solid var(--line);color:#fff;border-radius:8px;padding:8px}
+.tabs{display:flex;gap:3px;background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:3px;margin:8px 0}
+.tabs button{flex:1;background:transparent;border:0;color:var(--muted);font-weight:800;font-size:12px;padding:7px;border-radius:6px;cursor:pointer}
+.tabs button.active{background:var(--red);color:#fff}
+.info{font-size:11px;color:var(--muted);line-height:1.4;margin-top:8px}.info b{color:#fff}
 canvas{width:360px;max-width:100%;background:#000;border-radius:8px}
+.list{margin-top:8px;font-size:11px}
 </style></head>
 <body>
-<div class="top"><img src="https://i.imgur.com/ZKh41DS.jpeg"><div><h1>Scorpions SG Gierath <span class="badge">5 TEAMS</span></h1><div style="font-size:12px;color:var(--muted)">U10 · U12 · U16w · U18 · Damen 1 · direkt von BBK/WBV</div></div></div>
+<div class="top"><img src="https://i.imgur.com/ZKh41DS.jpeg"><div><h1>Scorpions SG Gierath <span class="badge">SPIELWOCHE</span></h1><div style="font-size:11px;color:var(--muted)">ID 54591 Damen + 55481/55482/55431/55495 Jugend · Tabelle/Ergebnisse/Termine</div></div></div>
 <div class="layout">
 <div class="panel">
-<label>Grafik-Typ</label>
-<div class="seg" id="typeSeg"><button data-type="termine" class="active">Termine</button><button data-type="ergebnisse">Ergebnisse</button></div>
-<label>Woche</label><select id="week"></select>
+<div class="tabs" id="modeTabs"><button data-mode="termine" class="active">Termine je Woche</button><button data-mode="ergebnisse">Ergebnisse</button><button data-mode="tabelle">Tabelle</button></div>
 <label>Team</label><select id="teamFilter"><option value="ALL">Alle 5 Teams</option></select>
-<div class="info" id="info">Lade 5 Ligen direkt von basketball-bund.net...</div>
-<button class="btn btn-ghost" id="reload">Neu laden</button>
-<button class="btn btn-primary" id="dl">Download PNGs</button>
+<label>Spielwoche / Spieltag (Tag)</label><select id="week"></select>
+<div class="info" id="info">Lade liga_id 54591 + 4 Jugend-Ligen...</div>
+<div class="list" id="debug"></div>
 </div>
-<div><div class="card"><canvas id="cv_post" width="1080" height="1080"></canvas></div><div class="card"><canvas id="cv_story" width="1080" height="1920"></canvas></div></div>
+<div>
+<div style="background:#141A22;border:1px solid #27313F;border-radius:12px;padding:10px;margin-bottom:10px"><canvas id="cv_post" width="1080" height="1080"></canvas></div>
+<div style="background:#141A22;border:1px solid #27313F;border-radius:12px;padding:10px"><canvas id="cv_story" width="1080" height="1920"></canvas></div>
+</div>
 </div>
 <script>
 const CFG={
- thema:"#b30000", logo:"https://i.imgur.com/ZKh41DS.jpeg",
  teams:[
-  {label:"U10", liga_id:"55481", verband:"BBK"},
-  {label:"U12", liga_id:"55482", verband:"BBK"},
-  {label:"U16w", liga_id:"55431", verband:"BBK"},
-  {label:"U18", liga_id:"55495", verband:"BBK"},
-  {label:"Damen 1", liga_id:"54651", verband:"WBV"}
+  {label:"U10", liga_id:"55481"},
+  {label:"U12", liga_id:"55482"},
+  {label:"U16w", liga_id:"55431"},
+  {label:"U18", liga_id:"55495"},
+  {label:"Damen 1", liga_id:"54591"} // DEINE ID - liefert Tabelle+Ergebnisse+Termine
  ]
 };
-const LOGO=new Image(); LOGO.crossOrigin="anonymous"; LOGO.src=CFG.logo; LOGO.onload=()=>draw(); LOGO.onerror=()=>draw();
-const CV={post:cv_post, story:cv_story};
-let allGames=[]; let weeks=[]; let state={week:0, filter:"ALL", type:"termine"};
-function parseDatum(s){let m=String(s||"").match(/(\d{2})\.(\d{2})\.(\d{4})/); if(m) return {date:`${m[1]}.${m[2]}.${m[3]}`, dt:new Date(+m[3],+m[2]-1,+m[1])}; return null;}
+// Fallback: deine 10 Spiele aus Screenshot falls BBK blockt
+const FALLBACK=[
+ {team:"Damen 1", tag:1, datum:"20.09.2026", zeit:"10:00", heim:"SG Rot-Weiß Gierath", gast:"Capitol Bascats Düsseldorf 2", dt:new Date(2026,8,20), erg:""},
+ {team:"Damen 1", tag:2, datum:"26.09.2026", zeit:"17:00", heim:"Basket Duisburg", gast:"SG Rot-Weiß Gierath", dt:new Date(2026,8,26), erg:""},
+ {team:"Damen 1", tag:3, datum:"03.10.2026", zeit:"13:00", heim:"WINGS Leverkusen 3", gast:"SG Rot-Weiß Gierath", dt:new Date(2026,9,3), erg:""},
+ {team:"Damen 1", tag:4, datum:"11.10.2026", zeit:"10:00", heim:"SG Rot-Weiß Gierath", gast:"TG Neuss 2", dt:new Date(2026,9,11), erg:""},
+ {team:"Damen 1", tag:5, datum:"06.11.2026", zeit:"20:00", heim:"DJK Köln-Nord", gast:"SG Rot-Weiß Gierath", dt:new Date(2026,10,6), erg:""},
+ {team:"Damen 1", tag:6, datum:"15.11.2026", zeit:"10:00", heim:"SG Rot-Weiß Gierath", gast:"BG Shots Kaarst-Büttgen", dt:new Date(2026,10,15), erg:""},
+ {team:"Damen 1", tag:7, datum:"23.11.2026", zeit:"09:00", heim:"BG Niederrhein", gast:"SG Rot-Weiß Gierath", dt:new Date(2026,10,23), erg:""},
+ {team:"Damen 1", tag:8, datum:"06.12.2026", zeit:"10:00", heim:"SG Rot-Weiß Gierath", gast:"ART Düsseldorf 2", dt:new Date(2026,11,6), erg:""},
+ {team:"Damen 1", tag:9, datum:"12.12.2026", zeit:"16:00", heim:"TV Grafenberg", gast:"SG Rot-Weiß Gierath", dt:new Date(2026,11,12), erg:""},
+ {team:"Damen 1", tag:10, datum:"20.12.2026", zeit:"10:00", heim:"SG Rot-Weiß Gierath", gast:"RheinStars Köln", dt:new Date(2026,11,20), erg:""}
+];
+const LOGO=new Image(); LOGO.crossOrigin="anonymous"; LOGO.src="https://i.imgur.com/ZKh41DS.jpeg"; LOGO.onload=()=>draw();
+let allGames=[], tables={}, state={mode:"termine", filter:"ALL", week:0, weeks:[]};
+
 async function fetchLiga(team){
  const target=`https://www.basketball-bund.net/index.jsp?Action=101&liga_id=${team.liga_id}`;
  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(target)}`;
  try{
   const r=await fetch(proxy); const j=await r.json(); const html=j.contents;
   const doc=new DOMParser().parseFromString(html,'text/html');
-  const rows=[...doc.querySelectorAll('tr')]; let games=[];
-  rows.forEach(tr=>{
+  let games=[];
+  // Spielplan Tabelle erkennen
+  doc.querySelectorAll('tr').forEach(tr=>{
    const tds=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
    if(tds.length<6) return;
-   let datumStr=tds.find(x=>/\d{2}\.\d{2}\.\d{4}/.test(x)); if(!datumStr) return;
-   let zeit=tds.find(x=>/^\d{2}:\d{2}/.test(x))||""; let heim=tds[4]||""; let gast=tds[5]||""; let erg=tds[6]||"";
-   if(!heim||!gast||heim==="Heim"||gast==="Gast") return;
-   let pd=parseDatum(datumStr); if(!pd) return;
-   games.push({_label:team.label, _date:pd.date, _dt:pd.dt, _time:zeit, Heim:heim, Gast:gast, Ergebnis:erg, liga_id:team.liga_id});
+   // Format aus deinem Screenshot: Nr | Tag | Datum | Heim | Gast | Halle
+   let nr=tds[0], tag=parseInt(tds[1])||0, datumZeit=tds[2]||"", heim=tds[3]||"", gast=tds[4]||"";
+   // anderer BBK Style: Datum steht in tds[1]
+   let datumMatch=datumZeit.match(/(\d{2}\.\d{2}\.\d{4}).*?(\d{2}:\d{2})?/);
+   if(!datumMatch){
+     // suche Datum in allen tds
+     for(let x of tds){ let m=x.match(/(\d{2}\.\d{2}\.\d{4})/); if(m){ datumMatch=[x,m[1], ""]; datumZeit=x; break; } }
+   }
+   if(!datumMatch||!heim||!gast||heim==="Heim") return;
+   let datum=datumMatch[1], zeit=datumMatch[2]|| (tds.find(s=>/\d{2}:\d{2}/.test(s))||"");
+   let [d,m,y]=datum.split("."); let dt=new Date(+y,+m-1,+d);
+   let erg=tds.find(s=>/^\d+:\d+$/.test(s)||/^\d+-\d+$/.test(s))||"";
+   games.push({team:team.label, tag, datum, zeit, heim, gast, erg, dt, liga_id:team.liga_id});
   });
   return games;
- }catch(e){console.warn(team.label,e); return [];}
+ }catch(e){ console.warn("fetch fail",team.label,e); return []; }
 }
-async function loadAll(){
- document.getElementById('info').textContent="Lade 5 Ligen...";
- const results=await Promise.all(CFG.teams.map(t=>fetchLiga(t)));
- allGames=[].concat(...results); allGames.sort((a,b)=>a._dt-b._dt);
+async function load(){
+ document.getElementById('info').textContent="Lade 5 Ligen... (54591 Damen sollte Termine liefern)";
+ let results=await Promise.all(CFG.teams.map(t=>fetchLiga(t)));
+ allGames=[].concat(...results);
+ if(allGames.length===0){ allGames=[...FALLBACK]; document.getElementById('info').innerHTML=`<b>BBK hat geblockt - nutze deine 10 Spiele aus Screenshot als Fallback für Damen 1 (ID 54591)</b>`; }
+ else { document.getElementById('info').innerHTML=`<b>${allGames.length} Spiele live von BBK</b> (Damen 54591: ${allGames.filter(g=>g.liga_id=="54591").length})`; }
+ build();
+}
+function build(){
  let filtered=allGames;
- if(state.filter!=="ALL") filtered=filtered.filter(g=>g._label===state.filter);
- let w=[]; let cur=null;
- filtered.forEach(g=>{ if(!cur || (g._dt-cur.end)/86400000>6){ cur={items:[g], start:g._dt, end:g._dt, label:g._date}; w.push(cur);} else {cur.items.push(g); cur.end=g._dt;}});
- weeks=w;
- document.getElementById('week').innerHTML=weeks.map((x,i)=>`<option value="${i}">${x.label} (${x.items.length} Spiele)</option>`).join('') || `<option>keine Termine - Ligen sind leer</option>`;
+ if(state.filter!=="ALL") filtered=allGames.filter(g=>g.team===state.filter);
+ if(state.mode==="ergebnisse") filtered=filtered.filter(g=>g.erg && g.erg!=="" );
+ if(state.mode==="termine") filtered=filtered.filter(g=>!g.erg || g.erg==="");
+ // gruppieren nach Tag = Spielwoche
+ let map=new Map();
+ filtered.forEach(g=>{ let key=`Tag ${g.tag||1} - ${g.datum}`; if(!map.has(key)) map.set(key, []); map.get(key).push(g); });
+ // sortiert nach Datum
+ let weeks=[...map.entries()].map(([label, items])=>({label, items, dt:items[0].dt})).sort((a,b)=>a.dt-b.dt);
+ state.weeks=weeks;
+ document.getElementById('week').innerHTML=weeks.map((w,i)=>`<option value="${i}">${w.label} (${w.items.length})</option>`).join('') || `<option>Keine Daten</option>`;
  if(state.week>=weeks.length) state.week=0;
- document.getElementById('info').innerHTML=`<b>${allGames.length} Spiele gesamt</b><br>`+CFG.teams.map(t=>`${t.label} (${t.liga_id}): ${allGames.filter(g=>g.liga_id==t.liga_id).length} Spiele`).join('<br>');
+ document.getElementById('debug').innerHTML=weeks.slice(0,10).map(w=>`${w.label}: ${w.items.map(g=>g.team).join(', ')}`).join('<br>');
  draw();
 }
 function draw(){
- const wk=weeks[state.week]; if(!wk){ for(let k in CV){let c=CV[k].getContext('2d'); c.fillStyle="#0B0E13"; c.fillRect(0,0,CV[k].width,CV[k].height); c.fillStyle="#8A97A6"; c.font="20px system-ui"; c.fillText("Keine Daten",50,100);} return;}
- for(let key in CV){
-  let cv=CV[key]; let c=cv.getContext('2d'); let W=cv.width,H=cv.height,S=Math.min(W,H);
+ const wk=state.weeks[state.week]; if(!wk){ let c=cv_post.getContext('2d'); c.fillStyle="#0B0E13"; c.fillRect(0,0,1080,1080); return; }
+ [cv_post,cv_story].forEach(cv=>{
+  let c=cv.getContext('2d'), W=cv.width,H=cv.height,S=Math.min(W,H);
   c.fillStyle="#0B0E13"; c.fillRect(0,0,W,H); c.fillStyle="#141A22"; c.fillRect(W*0.045,H*0.045,W*0.91,H*0.91);
-  c.fillStyle=CFG.thema; c.fillRect(W*0.045,H*0.045,W*0.91,12);
-  c.fillStyle="#fff"; c.font=`900 ${S*0.032}px system-ui`; c.fillText((wk.label+" - "+state.type).toUpperCase(),W*0.07,H*0.11);
-  let y=H*0.16; wk.items.slice(0,6).forEach(r=>{
+  c.fillStyle="#b30000"; c.fillRect(W*0.045,H*0.045,W*0.91,10);
+  if(LOGO.complete&&LOGO.naturalWidth) c.drawImage(LOGO,W*0.07,H*0.07,W*0.12,W*0.12);
+  c.fillStyle="#fff"; c.font=`900 ${S*0.028}px system-ui`; c.textAlign="left"; c.fillText(wk.label.toUpperCase(),W*0.22,H*0.12);
+  c.fillStyle="#8A97A6"; c.font=`600 ${S*0.015}px system-ui`; c.fillText(`${state.mode.toUpperCase()} - ${state.filter==="ALL"?"ALLE 5 TEAMS":state.filter}`,W*0.22,H*0.15);
+  let y=H*0.20;
+  wk.items.slice(0,6).forEach(g=>{
    c.fillStyle="#1B232E"; c.fillRect(W*0.07,y,W*0.86,H*0.07); c.fillStyle="#b30000"; c.fillRect(W*0.07,y,W*0.12,H*0.07);
-   c.fillStyle="#fff"; c.font=`800 ${S*0.018}px system-ui`; c.textAlign="center"; c.fillText(r._label,W*0.13,y+H*0.042);
-   c.textAlign="left"; c.fillStyle="#fff"; c.font=`700 ${S*0.018}px system-ui`; c.fillText(`${r.Heim} vs ${r.Gast}`,W*0.22,y+H*0.03);
-   c.fillStyle="#8A97A6"; c.font=`600 ${S*0.014}px system-ui`; c.fillText(`${r._date} ${r._time} ${r.Ergebnis||""}`,W*0.22,y+H*0.055); y+=H*0.08;
+   c.fillStyle="#fff"; c.textAlign="center"; c.font=`800 ${S*0.015}px system-ui`; c.fillText(g.team,W*0.13,y+H*0.04);
+   c.textAlign="left"; c.font=`700 ${S*0.014}px system-ui`; c.fillText(`${g.heim} vs ${g.gast}`,W*0.22,y+H*0.03);
+   c.fillStyle="#8A97A6"; c.font=`600 ${S*0.011}px system-ui`; c.fillText(`${g.datum} ${g.zeit} ${g.erg||""} ${g.tag?`(Tag ${g.tag})`:""}`,W*0.22,y+H*0.052);
+   y+=H*0.085;
   });
- }
+ });
 }
-document.getElementById('teamFilter').innerHTML='<option value="ALL">Alle 5 Teams</option>'+CFG.teams.map(t=>`<option value="${t.label}">${t.label} - ${t.liga_id}</option>`).join('');
-document.getElementById('teamFilter').addEventListener('change',e=>{state.filter=e.target.value; loadAll();});
+document.getElementById('teamFilter').innerHTML='<option value="ALL">Alle 5 Teams</option>'+CFG.teams.map(t=>`<option value="${t.label}">${t.label} (${t.liga_id})</option>`).join('');
+document.getElementById('teamFilter').addEventListener('change',e=>{state.filter=e.target.value; build();});
 document.getElementById('week').addEventListener('change',e=>{state.week=+e.target.value; draw();});
-document.getElementById('typeSeg').addEventListener('click',e=>{ if(e.target.tagName!=="BUTTON") return; document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); state.type=e.target.dataset.type; loadAll();});
-document.getElementById('reload').addEventListener('click',()=>loadAll());
-document.getElementById('dl').addEventListener('click',()=>{ for(let k in CV){ CV[k].toBlob(b=>{ let a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`scorpions_${state.type}_${k}.png`; a.click(); }); }});
-loadAll();
+document.getElementById('modeTabs').addEventListener('click',e=>{ if(e.target.tagName!=="BUTTON") return; document.querySelectorAll('#modeTabs button').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); state.mode=e.target.dataset.mode; state.week=0; build(); });
+load();
 </script>
 </body>
 </html>
