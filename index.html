@@ -92,9 +92,56 @@ const VEREINE={"V001": {"id": "V001", "name": "ONLANG", "kurz": "ONLANG", "suchn
 const CUSTOMER=(new URLSearchParams(location.search).get("kunde")||"V002").toUpperCase();
 const CFG=VEREINE[CUSTOMER]||VEREINE["V002"]||Object.values(VEREINE)[0]||{name:"Verein",kurz:"Verein",teams:[]};
 LOGO.src=CFG.logo||"";
-const VEREIN=CFG.suchname||CFG.name||"";
+let VEREIN=CFG.suchname||CFG.name||"";
 const MATCHKW=(CFG.matchKeyword||CFG.suchname||CFG.name||"").toLowerCase();
-const TEAMS=(CFG.teams||[]).map(t=>({label:t.label,mannschaft:t.mannschaft,teamSl:t.teamSl,liga:t.liga,liga_id:t.liga_id}));
+let TEAMS=(CFG.teams||[]).map(t=>({
+  label:t.label||t.mannschaft||t.Team_Name||t.Mannschaft_Name||"",
+  mannschaft:t.mannschaft||t.Mannschaft_Name||t.Team_Name||"",
+  teamSl:t.teamSl||t.teamSlTeamname||t.TeamSL_Teamname||"",
+  liga:t.liga||t.Liga||t.Liga_Name||"",
+  liga_id:t.liga_id||t.Liga_ID||"",
+  vereinName:t.vereinName||t.Verein_Name||VEREIN,
+  aktiv:t.aktiv||t.Aktiv||"Ja",
+  sportQuelle:t.sportQuelle||t.Sportdaten_Quelle||""
+}));
+
+async function ladeKundenTeams(){
+  try{
+    const url=GAS+"?action=get_bootstrap&kundenId="+encodeURIComponent(CUSTOMER);
+    const r=await fetch(url,{cache:"no-store"});
+    const d=await r.json();
+    if(!d || d.success!==true) throw new Error(d&&d.error?d.error:"Bootstrap nicht verfügbar");
+
+    if(d.branding){
+      VEREIN=d.branding.Verein_Name||d.branding.vereinName||d.branding.Name||VEREIN;
+      if(d.branding.logo_url) CFG.logo=d.branding.logo_url;
+      if(d.branding.Logo_URL) CFG.logo=d.branding.Logo_URL;
+    }
+
+    const raw=Array.isArray(d.teams)?d.teams:[];
+    TEAMS=raw
+      .filter(t=>String(t.Aktiv||t.aktiv||"Ja").trim().toLowerCase()!=="nein")
+      .map(t=>({
+        label:String(t.Team_Name||t.team_name||t.Mannschaft_Name||t.mannschaft||"Team").trim(),
+        mannschaft:String(t.Mannschaft_Name||t.mannschaft||t.Team_Name||t.team_name||"").trim(),
+        teamSl:String(t.TeamSL_Teamname||t.teamSlTeamname||t.teamSl||"").trim(),
+        liga:String(t.Liga||t.liga||t.Liga_Name||"").trim(),
+        liga_id:String(t.Liga_ID||t.liga_id||"").trim(),
+        vereinName:String(t.Verein_Name||VEREIN||"").trim(),
+        aktiv:t.Aktiv||t.aktiv||"Ja",
+        sportQuelle:String(t.Sportdaten_Quelle||"").trim()
+      }))
+      .filter(t=>t.mannschaft);
+
+    TEAMS.sort((a,b)=>a.label.localeCompare(b.label,"de"));
+
+    if(CFG.logo) LOGO.src=CFG.logo;
+    return true;
+  }catch(e){
+    console.warn("Kunden-Teams konnten nicht aus GAS geladen werden:",e);
+    return false;
+  }
+}
 const SPONSOR_INHALTE=[{kunde:CUSTOMER,logo_url:CFG.sponsorLogo||"",banner_text:CFG.sponsorText||"",aktiv:"TRUE"}];
 function loadSponsoren(k){return SPONSOR_INHALTE.filter(s=>(s.logo_url||s.banner_text));}
 const _lc={};function logoImg(u){if(!u)return null;if(!_lc[u]){const im=new Image();im.crossOrigin="anonymous";im.onload=()=>render();im.onerror=()=>{im.failed=true;render();};im.src=u;_lc[u]=im;}return _lc[u];}
@@ -105,7 +152,12 @@ function scName(n){return matchesVerein(n)?BRAND.name:n;}
 /* ---- fetch + cache ---- */
 const cache={};
 async function gasGet(action,team){
-  const p=new URLSearchParams({action,vereinName:VEREIN,mannschaft:team.mannschaft,teamSlTeamname:team.teamSl});
+  const p=new URLSearchParams({
+    action,
+    vereinName:team.vereinName||VEREIN,
+    mannschaft:team.mannschaft,
+    teamSlTeamname:team.teamSl||""
+  });
   const r=await fetch(GAS+"?"+p.toString());
   const d=await r.json();
   if(!d||d.success!==true) return [];
@@ -216,5 +268,21 @@ document.getElementById("hdrLogo").src=CFG.logo||"";
 document.getElementById("hdrName").textContent="ONLANG Social · "+(CFG.kurz||CFG.name||"");
 document.getElementById("hdrSub").textContent=CUSTOMER+" · "+(CFG.name||"")+" · Live 2026/27";
 document.title="ONLANG Social · "+(CFG.kurz||CFG.name||"");
-fillTeamSelect(); render();  /* Start: nur Platzhalter, kein Fetch */
+
+(async function initGenerator(){
+  info("Lade Mannschaften und Spielplandaten aus dem ONLANG-Sheet …");
+  const ok=await ladeKundenTeams();
+  document.getElementById("hdrLogo").src=CFG.logo||"";
+  document.getElementById("hdrName").textContent="ONLANG Social · "+(CFG.kurz||CFG.name||"");
+  document.getElementById("hdrSub").textContent=CUSTOMER+" · "+(CFG.name||"")+" · Live 2026/27";
+  fillTeamSelect();
+  if(!ok){
+    info("Mannschaften konnten nicht aus dem Sheet geladen werden. Bitte Verbindung prüfen.");
+  }else if(!TEAMS.length){
+    info("Keine aktiven Mannschaften für diesen Verein im Sheet gefunden.");
+  }else{
+    info(TEAMS.length+" aktive Mannschaften aus dem Sheet geladen.");
+  }
+  render();
+})();
 </script></body></html>
