@@ -120,7 +120,7 @@ async function ladeKundenTeams(){
 
     const raw=Array.isArray(d.teams)?d.teams:[];
     TEAMS=raw
-      .filter(t=>String(t.Aktiv||t.aktiv||t.Status||"Ja").trim().toLowerCase()!=="nein")
+      .filter(t=>String(t.Aktiv||t.aktiv||"Ja").trim().toLowerCase()!=="nein")
       // BBK_Aktiv wird hier bewusst NICHT gefiltert: WBV-Mannschaften
       // (z.B. Damen 1) gehören weiterhin zum Scorpions-Spielplan.
       .map(t=>({
@@ -130,10 +130,8 @@ async function ladeKundenTeams(){
         liga:String(t.Liga||t.liga||t.Liga_Name||"").trim(),
         liga_id:String(t.Liga_ID||t.liga_id||"").trim(),
         vereinName:String(t.Verein_Name||VEREIN||"").trim(),
-        aktiv:t.Aktiv||t.aktiv||t.Status||"Ja",
+        aktiv:t.Aktiv||t.aktiv||"Ja",
         sportQuelle:String(t.Sportdaten_Quelle||"").trim(),
-        verband:String(t.Kreis_ID||t.Verband||t.verband||"").trim(),
-        bbkAktiv:String(t.BBK_Aktiv||t.bbkAktiv||"").trim()
       }))
       .filter(t=>t.mannschaft);
 
@@ -161,8 +159,6 @@ async function gasGet(action,team){
     vereinName:team.vereinName||VEREIN,
     mannschaft:team.mannschaft,
     teamSlTeamname:team.teamSl||"",
-    _source:"BBK-Spielbetrieb",
-    _kunde:CUSTOMER
   });
   const r=await fetch(GAS+"?"+p.toString());
   const d=await r.json();
@@ -183,10 +179,7 @@ function istEigenesSpiel(x,team){
     CFG&&CFG.name,
     CFG&&CFG.kurz,
     CFG&&CFG.matchKeyword,
-    BRAND&&BRAND.name,
-    "scorpions",
-    "sg rw gierath",
-    "sg rot weiss gierath"
+    BRAND&&BRAND.name
   ].map(normSpielname).filter(v=>v.length>=4);
   return kandidaten.some(k=>heim.includes(k)||gast.includes(k));
 }
