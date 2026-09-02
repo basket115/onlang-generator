@@ -46,7 +46,7 @@
   </div>
   <div class="demo-note">
     <b>Live aus deiner GAS-Schnittstelle · Verein per <code>?kunde=…</code> wählbar.</b>
-    Mannschaften werden beim Start aus dem zentralen Sheet „BBK-Spielbetrieb“ geladen; Spielplandaten werden bei Auswahl von Termine/Ergebnisse live geladen.
+    Daten laden erst beim Wechsel auf Ergebnis / Ergebnisse / Termine / Tabelle – nicht beim Start.
   </div>
   <div class="layout">
     <div class="panel">
@@ -92,58 +92,9 @@ const VEREINE={"V001": {"id": "V001", "name": "ONLANG", "kurz": "ONLANG", "suchn
 const CUSTOMER=(new URLSearchParams(location.search).get("kunde")||"V002").toUpperCase();
 const CFG=VEREINE[CUSTOMER]||VEREINE["V002"]||Object.values(VEREINE)[0]||{name:"Verein",kurz:"Verein",teams:[]};
 LOGO.src=CFG.logo||"";
-let VEREIN=CFG.suchname||CFG.name||"";
+const VEREIN=CFG.suchname||CFG.name||"";
 const MATCHKW=(CFG.matchKeyword||CFG.suchname||CFG.name||"").toLowerCase();
-let TEAMS=(CFG.teams||[]).map(t=>({
-  label:t.label||t.mannschaft||t.Team_Name||t.Mannschaft_Name||"",
-  mannschaft:t.mannschaft||t.Mannschaft_Name||t.Team_Name||"",
-  teamSl:t.teamSl||t.teamSlTeamname||t.TeamSL_Teamname||"",
-  liga:t.liga||t.Liga||t.Liga_Name||"",
-  liga_id:t.liga_id||t.Liga_ID||"",
-  vereinName:t.vereinName||t.Verein_Name||VEREIN,
-  aktiv:t.aktiv||t.Aktiv||"Ja",
-  sportQuelle:t.sportQuelle||t.Sportdaten_Quelle||""
-}));
-
-async function ladeKundenTeams(){
-  try{
-    const url=GAS+"?action=get_bootstrap&kundenId="+encodeURIComponent(CUSTOMER);
-    const r=await fetch(url,{cache:"no-store"});
-    const d=await r.json();
-    if(!d || d.success!==true) throw new Error(d&&d.error?d.error:"Bootstrap nicht verfügbar");
-
-    if(d.branding){
-      VEREIN=d.branding.Verein_Name||d.branding.vereinName||d.branding.Name||VEREIN;
-      if(d.branding.logo_url) CFG.logo=d.branding.logo_url;
-      if(d.branding.Logo_URL) CFG.logo=d.branding.Logo_URL;
-    }
-
-    const raw=Array.isArray(d.teams)?d.teams:[];
-    TEAMS=raw
-      .filter(t=>String(t.Aktiv||t.aktiv||"Ja").trim().toLowerCase()!=="nein")
-      // BBK_Aktiv wird hier bewusst NICHT gefiltert: WBV-Mannschaften
-      // (z.B. Damen 1) gehören weiterhin zum Scorpions-Spielplan.
-      .map(t=>({
-        label:String(t.Team_Name||t.team_name||t.Mannschaft_Name||t.mannschaft||"Team").trim(),
-        mannschaft:String(t.Mannschaft_Name||t.mannschaft||t.Team_Name||t.team_name||"").trim(),
-        teamSl:String(t.TeamSL_Teamname||t.teamSlTeamname||t.teamSl||"").trim(),
-        liga:String(t.Liga||t.liga||t.Liga_Name||"").trim(),
-        liga_id:String(t.Liga_ID||t.liga_id||"").trim(),
-        vereinName:String(t.Verein_Name||VEREIN||"").trim(),
-        aktiv:t.Aktiv||t.aktiv||"Ja",
-        sportQuelle:String(t.Sportdaten_Quelle||"").trim(),
-      }))
-      .filter(t=>t.mannschaft);
-
-    TEAMS.sort((a,b)=>a.label.localeCompare(b.label,"de"));
-
-    if(CFG.logo) LOGO.src=CFG.logo;
-    return true;
-  }catch(e){
-    console.warn("Kunden-Teams konnten nicht aus GAS geladen werden:",e);
-    return false;
-  }
-}
+const TEAMS=(CFG.teams||[]).map(t=>({label:t.label,mannschaft:t.mannschaft,teamSl:t.teamSl,liga:t.liga,liga_id:t.liga_id}));
 const SPONSOR_INHALTE=[{kunde:CUSTOMER,logo_url:CFG.sponsorLogo||"",banner_text:CFG.sponsorText||"",aktiv:"TRUE"}];
 function loadSponsoren(k){return SPONSOR_INHALTE.filter(s=>(s.logo_url||s.banner_text));}
 const _lc={};function logoImg(u){if(!u)return null;if(!_lc[u]){const im=new Image();im.crossOrigin="anonymous";im.onload=()=>render();im.onerror=()=>{im.failed=true;render();};im.src=u;_lc[u]=im;}return _lc[u];}
@@ -154,12 +105,7 @@ function scName(n){return matchesVerein(n)?BRAND.name:n;}
 /* ---- fetch + cache ---- */
 const cache={};
 async function gasGet(action,team){
-  const p=new URLSearchParams({
-    action,
-    vereinName:team.vereinName||VEREIN,
-    mannschaft:team.mannschaft,
-    teamSlTeamname:team.teamSl||"",
-  });
+  const p=new URLSearchParams({action,vereinName:VEREIN,mannschaft:team.mannschaft,teamSlTeamname:team.teamSl});
   const r=await fetch(GAS+"?"+p.toString());
   const d=await r.json();
   if(!d||d.success!==true) return [];
@@ -168,66 +114,22 @@ async function gasGet(action,team){
 function parseDatum(s){const m=String(s||"").match(/(\d{1,2})\.(\d{1,2})\.(\d{4})(?:[ T]+(\d{1,2}:\d{2}))?/);
   if(!m)return{date:String(s||""),time:"",dt:null};
   return{date:m[1].padStart(2,"0")+"."+m[2].padStart(2,"0")+"."+m[3],time:m[4]||"",dt:new Date(+m[3],+m[2]-1,+m[1])};}
-function normSpielname(v){
-  return String(v||"").toLowerCase().replace(/[–—-]/g," ").replace(/[^a-z0-9äöüß]+/gi," ").replace(/\s+/g," ").trim();
-}
-function istEigenesSpiel(x,team){
-  const heim=normSpielname(x.Heim), gast=normSpielname(x.Gast);
-  const kandidaten=[
-    team&&team.teamSl,
-    team&&team.vereinName,
-    CFG&&CFG.name,
-    CFG&&CFG.kurz,
-    CFG&&CFG.matchKeyword,
-    BRAND&&BRAND.name
-  ].map(normSpielname).filter(v=>v.length>=4);
-  return kandidaten.some(k=>heim.includes(k)||gast.includes(k));
-}
 async function loadSpiele(action){
   if(!TEAMS.length)return [];
   if(cache[action])return cache[action];
   const res=await Promise.allSettled(TEAMS.map(t=>gasGet(action,t)));
   if(res.every(r=>r.status==="rejected"))throw new Error("Live-Abruf fehlgeschlagen (CORS/Netzwerk)");
-  const parts=res.map((r,i)=>{
-    if(r.status!=="fulfilled") return [];
-    const team=TEAMS[i];
-    return (r.value||[]).filter(x=>istEigenesSpiel(x,team)).map(x=>{
-      const p=parseDatum(x.Datum);
-      return Object.assign({},x,{_label:team.label,_date:p.date,_time:p.time,_dt:p.dt,_team:team});
-    });
-  });
+  const parts=res.map((r,i)=> r.status==="fulfilled" ? (r.value||[]).map(x=>{const p=parseDatum(x.Datum);return Object.assign({},x,{_label:TEAMS[i].label,_date:p.date,_time:p.time,_dt:p.dt});}) : []);
   let merged=[].concat.apply([],parts).filter(x=>x._dt);
-  // Ein Spiel darf bei mehreren Mannschafts-Abfragen nicht doppelt erscheinen.
-  const seen=new Set();
-  merged=merged.filter(x=>{
-    const key=[x.Datum,x.Zeit||x._time,x.Heim,x.Gast].join("|").toLowerCase();
-    if(seen.has(key)) return false;
-    seen.add(key); return true;
-  });
   merged.sort((a,b)=>a._dt-b._dt);
   cache[action]=merged;return merged;
 }
 async function loadTabelle(team){const k="tab:"+team.liga_id;if(cache[k])return cache[k];
   const a=await gasGet("getBbkTabelle",team);cache[k]=a||[];return cache[k];}
-function buildWeeks(items){
-  // Eine Auswahl = eine echte Kalenderwoche (Mo–So).
-  // Dadurch werden zwei aufeinanderfolgende Wochenenden niemals zusammengezogen.
-  const groups=new Map();
-  items.forEach(x=>{
-    const d=new Date(x._dt);
-    const day=d.getDay()||7; // Sonntag=7
-    const monday=new Date(d.getFullYear(),d.getMonth(),d.getDate()-(day-1));
-    const key=monday.getFullYear()+"-"+String(monday.getMonth()+1).padStart(2,"0")+"-"+String(monday.getDate()).padStart(2,"0");
-    if(!groups.has(key)) groups.set(key,{items:[],start:monday,end:new Date(monday.getFullYear(),monday.getMonth(),monday.getDate()+6)});
-    groups.get(key).items.push(x);
-  });
-  return Array.from(groups.values()).sort((a,b)=>a.start-b.start).map((g,i)=>{
-    const dates=g.items.map(x=>x._dt).sort((a,b)=>a-b);
-    const a=parseDatum(new Date(dates[0]).toLocaleDateString("de-DE")).date;
-    const b=parseDatum(new Date(dates[dates.length-1]).toLocaleDateString("de-DE")).date;
-    return {id:String(i),label:a===b?a:(a.slice(0,6)+"–"+b),items:g.items};
-  });
-}
+function buildWeeks(items){const w=[];let cur=null;
+  items.forEach(x=>{if(!cur||(x._dt-cur.end)/86400000>2){cur={items:[x],start:x._dt,end:x._dt};w.push(cur);}else{cur.items.push(x);cur.end=x._dt;}});
+  return w.map((g,i)=>{const a=g.items[0]._date,b=g.items[g.items.length-1]._date;
+    return {id:String(i),label:a===b?a:(a.slice(0,6)+"–"+b),items:g.items};});}
 
 /* ===== Canvas ===== */
 function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
@@ -259,7 +161,7 @@ function syncErgFromGame(g){if(!g)return;const m=String(g.Ergebnis||"").match(/(
 
 async function render(){
   const type=state.type;
-  if(!type){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social","Wähle Ergebnis, Ergebnisse, Termine oder Tabelle.","Mannschaften werden beim Start aus dem ONLANG-Sheet geladen; Spielplandaten beim Wechsel geladen."));return;}
+  if(!type){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social","Wähle Ergebnis, Ergebnisse, Termine oder Tabelle.","Live-Daten werden erst bei Auswahl geladen."));return;}
   drawAll((c,W,H)=>msgState(c,W,H,type==="ergebnis"?"Ergebnis":type==="ergebnisse"?"Ergebnisse":type==="termine"?"Spieltermine":"Tabelle","Lädt Live-Daten …",""));
   try{
     if(!TEAMS.length){drawAll((c,W,H)=>msgState(c,W,H,"Keine Mannschaften","Für diesen Verein sind keine Teams/Ligen im Sheet hinterlegt.",""));info("Keine Mannschaften hinterlegt.");return;}
@@ -314,21 +216,5 @@ document.getElementById("hdrLogo").src=CFG.logo||"";
 document.getElementById("hdrName").textContent="ONLANG Social · "+(CFG.kurz||CFG.name||"");
 document.getElementById("hdrSub").textContent=CUSTOMER+" · "+(CFG.name||"")+" · Live 2026/27";
 document.title="ONLANG Social · "+(CFG.kurz||CFG.name||"");
-
-(async function initGenerator(){
-  info("Lade Mannschaften und Spielplandaten aus dem ONLANG-Sheet …");
-  const ok=await ladeKundenTeams();
-  document.getElementById("hdrLogo").src=CFG.logo||"";
-  document.getElementById("hdrName").textContent="ONLANG Social · "+(CFG.kurz||CFG.name||"");
-  document.getElementById("hdrSub").textContent=CUSTOMER+" · "+(CFG.name||"")+" · Live 2026/27";
-  fillTeamSelect();
-  if(!ok){
-    info("Mannschaften konnten nicht aus dem Sheet geladen werden. Bitte Verbindung prüfen.");
-  }else if(!TEAMS.length){
-    info("Keine aktiven Mannschaften für diesen Verein im Sheet gefunden.");
-  }else{
-    info(TEAMS.length+" aktive Mannschaften aus dem Sheet geladen.");
-  }
-  render();
-})();
+fillTeamSelect(); render();  /* Start: nur Platzhalter, kein Fetch */
 </script></body></html>
