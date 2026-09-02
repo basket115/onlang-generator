@@ -2,87 +2,109 @@
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ONLANG Social · V002</title>
+<title>Scorpions V002 - 5 Teams LIVE</title>
 <style>
-:root{--ink:#0B0E13;--surface:#141A22;--surface2:#1B232E;--line:#27313F;--red:#b30000;--muted:#8A97A6;--radius:14px;--font:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-*{box-sizing:border-box}html,body{margin:0}body{background:var(--ink);color:#fff;font-family:var(--font);padding:22px}
-.top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
-img.logo{width:46px;height:46px;object-fit:contain;border-radius:9px;background:#fff;padding:4px}
-h1{font-size:20px;margin:0;font-weight:800}.sub{color:var(--muted);font-size:13px}
-.demo-note{background:rgba(255,0,0,.10);border:1px solid rgba(255,0,0,.32);color:#ffd6d6;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:18px}
-.layout{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}
-@media(max-width:900px){.layout{grid-template-columns:1fr}}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
-label{display:block;font-size:12px;color:var(--muted);margin:12px 0 5px;font-weight:600}
-select,input{width:100%;background:var(--surface2);border:1px solid var(--line);color:#fff;border-radius:9px;padding:9px 10px;font-size:14px}
-.seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
-.seg button{flex:1;background:transparent;border:0;color:var(--muted);font-weight:700;font-size:12px;padding:8px 4px;border-radius:7px;cursor:pointer}
+:root{--ink:#0B0E13;--surface:#141A22;--surface2:#1B232E;--line:#27313F;--red:#b30000;--muted:#8A97A6;--font:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+*{box-sizing:border-box}body{margin:0;background:var(--ink);color:#fff;font-family:var(--font);padding:18px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}.top img{width:44px;height:44px;background:#fff;border-radius:8px;padding:3px}
+h1{margin:0;font-size:19px}.badge{background:#b30000;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:800}
+.layout{display:grid;grid-template-columns:340px 1fr;gap:18px}@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+label{font-size:11px;color:var(--muted);font-weight:700;margin:10px 0 4px;display:block;text-transform:uppercase;letter-spacing:.08em}
+select{width:100%;background:var(--surface2);border:1px solid var(--line);color:#fff;border-radius:9px;padding:9px}
+.seg{display:flex;gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{flex:1;background:transparent;border:0;color:var(--muted);font-weight:800;font-size:12px;padding:8px;border-radius:7px;cursor:pointer}
 .seg button.active{background:var(--red);color:#fff}
-.ligainfo{margin-top:14px;font-size:12px;color:var(--muted)}.ligainfo b{color:#fff}
-.btn{border:0;border-radius:10px;padding:11px 14px;font-size:14px;font-weight:800;cursor:pointer;width:100%;margin-top:8px}
+.info{font-size:12px;color:var(--muted);line-height:1.5;margin-top:12px}.info b{color:#fff}
+.btn{width:100%;padding:10px;border-radius:9px;border:0;font-weight:800;cursor:pointer;margin-top:8px}
 .btn-primary{background:var(--red);color:#fff}.btn-ghost{background:var(--surface2);color:#fff;border:1px solid var(--line)}
-[hidden]{display:none!important}.previews{display:flex;flex-wrap:wrap;gap:20px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px}
-canvas{display:block;border-radius:8px;background:#000}.c-post canvas{width:360px}.c-story canvas{width:220px}.c-banner canvas{width:520px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:12px}
+canvas{width:360px;max-width:100%;background:#000;border-radius:8px}
 </style></head>
 <body>
-<div class="top"><img class="logo" id="hdrLogo" alt=""><div><h1 id="hdrName">ONLANG Social</h1><div class="sub">Live 2026/27</div></div></div>
-<div class="demo-note"><b>Live aus GAS · V002 Fix mit liga_id</b></div>
+<div class="top"><img src="https://i.imgur.com/ZKh41DS.jpeg"><div><h1>Scorpions SG Gierath <span class="badge">5 TEAMS</span></h1><div style="font-size:12px;color:var(--muted)">U10 · U12 · U16w · U18 · Damen 1 · direkt von BBK/WBV</div></div></div>
 <div class="layout">
 <div class="panel">
-<h2>Einstellungen</h2>
 <label>Grafik-Typ</label>
-<div class="seg" id="typeSeg"><button data-type="ergebnis">Ergebnis</button><button data-type="ergebnisse">Ergebnisse</button><button data-type="termine" class="active">Termine</button><button data-type="tabelle">Tabelle</button></div>
-<div id="gameWrap" hidden><label>Spiel</label><select id="game"></select></div>
-<div id="weekWrap"><label>Woche</label><select id="week"></select></div>
-<div id="teamWrap" hidden><label>Mannschaft</label><select id="team"></select></div>
-<div id="ergebnisFields" hidden><label>Heim</label><input id="heim"><label>Gast</label><input id="gast"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label>PH</label><input id="ph" type="number"></div><div><label>PG</label><input id="pg" type="number"></div></div><label>Datum</label><input id="datum"><label>Ort</label><input id="ort"></div>
-<div class="ligainfo" id="ligainfo">Lädt...</div>
-<button class="btn btn-ghost" id="refresh">Neu laden</button>
-<button class="btn btn-primary" id="download">Alle 3 Formate herunterladen</button>
+<div class="seg" id="typeSeg"><button data-type="termine" class="active">Termine</button><button data-type="ergebnisse">Ergebnisse</button></div>
+<label>Woche</label><select id="week"></select>
+<label>Team</label><select id="teamFilter"><option value="ALL">Alle 5 Teams</option></select>
+<div class="info" id="info">Lade 5 Ligen direkt von basketball-bund.net...</div>
+<button class="btn btn-ghost" id="reload">Neu laden</button>
+<button class="btn btn-primary" id="dl">Download PNGs</button>
 </div>
-<div class="previews">
-<div class="card c-post"><p class="cap">Post</p><canvas id="cv_post" width="1080" height="1080"></canvas></div>
-<div class="card c-story"><p class="cap">Story</p><canvas id="cv_story" width="1080" height="1920"></canvas></div>
-<div class="card c-banner"><p class="cap">Banner</p><canvas id="cv_banner" width="1920" height="1080"></canvas></div>
-</div>
+<div><div class="card"><canvas id="cv_post" width="1080" height="1080"></canvas></div><div class="card"><canvas id="cv_story" width="1080" height="1920"></canvas></div></div>
 </div>
 <script>
-const LOGO=new Image(); LOGO.crossOrigin="anonymous"; LOGO.onload=()=>render(); LOGO.onerror=()=>{LOGO.failed=true; render();};
-const GAS="https://script.google.com/macros/s/AKfycbzrvPIQsGaqHP28_9G-geahMB0QMYHlbylnGLUTeJagi1Sc_rgPVErasrhc0HGGthppYA/exec";
-const VEREINE={"V002":{"id":"V002","name":"Scorpions SG Gierath","kurz":"Scorpions","suchname":"SG Rot-Weiß Gierath","matchKeyword":"Gierath","logo":"https://i.imgur.com/ZKh41DS.jpeg","thema":"#b30000","sponsorLogo":"https://i.imgur.com/5b852Lw.png","sponsorText":"Vereins-App powered by ONLANG\nDie Plattform für moderne Vereins-Apps.","teams":[{"label":"U10","mannschaft":"U10 Kreisliga","teamSl":"SG Rot-Weiß Gierath","liga_id":"55481","liga":"Kreisliga U10 DNE + W Gr. B"},{"label":"U12","mannschaft":"U12 Kreisliga","teamSl":"SG RW Gierath","liga_id":"55482","liga":"Kreisliga U12 DNE Gr. A"},{"label":"U16w","mannschaft":"U16 Kreisliga (w)","teamSl":"SG RW Gierath","liga_id":"55431","liga":"Kreisliga U16 Weiblich"},{"label":"U18","mannschaft":"U18 Kreisliga","teamSl":"SG RW Gierath","liga_id":"55495","liga":"Kreisliga U18"}]}};
-const CFG=VEREINE["V002"]; LOGO.src=CFG.logo; const VEREIN=CFG.suchname; const TEAMS=CFG.teams; const MATCHKW=CFG.matchKeyword.toLowerCase();
-function matchesVerein(n){return String(n||"").toLowerCase().indexOf(MATCHKW)>=0;} function scName(n){return n;}
-function parseDatum(s){s=String(s||"").trim(); let m=s.match(/(\d{4})[-\/\.](\d{1,2})[-\/\.](\d{1,2})(?:[ T]+(\d{1,2}:\d{2}))?/); if(m) return {date:m[3].padStart(2,"0")+"."+m[2].padStart(2,"0")+"."+m[1],time:m[4]||"",dt:new Date(+m[1],+m[2]-1,+m[3])}; m=s.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})(?:[ T]+(\d{1,2}:\d{2}))?/); if(m) return {date:m[1].padStart(2,"0")+"."+m[2].padStart(2,"0")+"."+m[3],time:m[4]||"",dt:new Date(+m[3],+m[2]-1,+m[1])}; return {date:s,time:"",dt:null};}
-const cache={};
-async function gasGet(action,team){
-  const p=new URLSearchParams({action,vereinName:VEREIN,mannschaft:team.mannschaft,teamSlTeamname:team.teamSl,liga_id:team.liga_id,teamLabel:team.label});
-  const r=await fetch(GAS+"?"+p.toString());
-  const d=await r.json();
-  if(!d||d.success!==true) return [];
-  return d[action==="getBbkSpielplan"?"spielplan":action==="getBbkErgebnisse"?"ergebnisse":"tabelle"]||[];
+const CFG={
+ thema:"#b30000", logo:"https://i.imgur.com/ZKh41DS.jpeg",
+ teams:[
+  {label:"U10", liga_id:"55481", verband:"BBK"},
+  {label:"U12", liga_id:"55482", verband:"BBK"},
+  {label:"U16w", liga_id:"55431", verband:"BBK"},
+  {label:"U18", liga_id:"55495", verband:"BBK"},
+  {label:"Damen 1", liga_id:"54651", verband:"WBV"}
+ ]
+};
+const LOGO=new Image(); LOGO.crossOrigin="anonymous"; LOGO.src=CFG.logo; LOGO.onload=()=>draw(); LOGO.onerror=()=>draw();
+const CV={post:cv_post, story:cv_story};
+let allGames=[]; let weeks=[]; let state={week:0, filter:"ALL", type:"termine"};
+function parseDatum(s){let m=String(s||"").match(/(\d{2})\.(\d{2})\.(\d{4})/); if(m) return {date:`${m[1]}.${m[2]}.${m[3]}`, dt:new Date(+m[3],+m[2]-1,+m[1])}; return null;}
+async function fetchLiga(team){
+ const target=`https://www.basketball-bund.net/index.jsp?Action=101&liga_id=${team.liga_id}`;
+ const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(target)}`;
+ try{
+  const r=await fetch(proxy); const j=await r.json(); const html=j.contents;
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const rows=[...doc.querySelectorAll('tr')]; let games=[];
+  rows.forEach(tr=>{
+   const tds=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+   if(tds.length<6) return;
+   let datumStr=tds.find(x=>/\d{2}\.\d{2}\.\d{4}/.test(x)); if(!datumStr) return;
+   let zeit=tds.find(x=>/^\d{2}:\d{2}/.test(x))||""; let heim=tds[4]||""; let gast=tds[5]||""; let erg=tds[6]||"";
+   if(!heim||!gast||heim==="Heim"||gast==="Gast") return;
+   let pd=parseDatum(datumStr); if(!pd) return;
+   games.push({_label:team.label, _date:pd.date, _dt:pd.dt, _time:zeit, Heim:heim, Gast:gast, Ergebnis:erg, liga_id:team.liga_id});
+  });
+  return games;
+ }catch(e){console.warn(team.label,e); return [];}
 }
-async function loadSpiele(action){if(cache[action]) return cache[action]; const res=await Promise.allSettled(TEAMS.map(t=>gasGet(action,t))); const parts=res.map((r,i)=>r.status==="fulfilled"?(r.value||[]).map(x=>{const p=parseDatum(x.Datum); if(!p.dt) return null; return {...x,_label:TEAMS[i].label,_date:p.date,_time:p.time,_dt:p.dt};}).filter(Boolean):[]); let m=[].concat(...parts); m.sort((a,b)=>a._dt-b._dt); cache[action]=m; return m;}
-async function loadTabelle(t){const k="tab:"+t.liga_id; if(cache[k]) return cache[k]; const a=await gasGet("getBbkTabelle",t); cache[k]=a||[]; return cache[k];}
-function buildWeeks(items){let w=[],cur=null; items.forEach(x=>{if(!cur||(x._dt-cur.end)/86400000>2){cur={items:[x],start:x._dt,end:x._dt}; w.push(cur);} else {cur.items.push(x); cur.end=x._dt;}}); return w.map((g,i)=>{const a=g.items[0]._date,b=g.items[g.items.length-1]._date; return {label:a===b?a:a+" - "+b,items:g.items};});}
-function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
-function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
-function txt(c,s,x,y,o){c.save(); if(o.upper) s=String(s).toUpperCase(); c.font=`${o.weight||700} ${Math.round(o.size)}px system-ui`; c.fillStyle=o.color||"#fff"; c.textAlign=o.align||"left"; c.textBaseline=o.baseline||"alphabetic"; c.fillText(s,Math.round(x),Math.round(y)); c.restore();}
-function frame(c,W,H){const S=Math.min(W,H); c.fillStyle="#0B0E13"; c.fillRect(0,0,W,H); c.fillStyle="#10151C"; rr(c,W*.045,H*.045,W*.91,H*.91,S*.03); c.fill(); c.fillStyle=css("--red"); c.beginPath(); c.moveTo(W,0); c.lineTo(W,H*.12); c.lineTo(W*.83,0); c.closePath(); c.fill();}
-function eyebrow(c,W,H,l,s){const S=Math.min(W,H),ph=S*.12,pad=S*.016,x=W*.07,y=H*.055,iw=ph-2*pad,pw=iw+2*pad; c.save(); c.fillStyle="#fff"; rr(c,x,y,pw,ph,S*.018); c.fill(); c.restore(); if(LOGO.complete&&LOGO.naturalWidth) c.drawImage(LOGO,Math.round(x+pad),Math.round(y+pad),Math.round(iw),Math.round(ph-2*pad)); const tx=x+pw+S*.03,cy=y+ph/2; c.fillStyle=css("--red"); rr(c,tx,cy-S*.03,S*.011,S*.06,3); c.fill(); txt(c,l,tx+S*.028,cy-S*.006,{size:S*.032,weight:900,upper:true}); txt(c,s,tx+S*.028,cy+S*.03,{size:S*.021,weight:600,color:"#8A97A6"});}
-function msgState(c,W,H,l,m){frame(c,W,H); eyebrow(c,W,H,l,"2026/27"); txt(c,m,W/2,H*.45,{size:Math.min(W,H)*.032,weight:800,align:"center",color:"#8A97A6"});}
-function drawListe(c,W,H,t,s,rows){frame(c,W,H); eyebrow(c,W,H,t,s); const S=Math.min(W,H),x=W*.09,w=W*.82,top=H*.24,rh=(H*.48)/Math.max(rows.length,1); rows.slice(0,6).forEach((r,i)=>{const y=top+i*rh; c.fillStyle=i%2?"#161D26":"#1B232E"; rr(c,x,y,w,rh*.86,10); c.fill(); c.fillStyle=css("--red"); rr(c,x+w*.02,y+rh*.20,w*.11,rh*.46,7); c.fill(); txt(c,r.label,x+w*.075,y+rh*.53,{size:S*.024,weight:900,align:"center"}); txt(c,r.heim+" - "+r.gast,x+w*.17,y+rh*.44,{size:S*.022,weight:700,maxW:w*.6,upper:true}); txt(c,r.datum,x+w*.17,y+rh*.70,{size:S*.017,weight:600,color:"#8A97A6"}); txt(c,r.zeit,x+w*.97,y+rh*.53,{size:S*.03,weight:900,align:"right",color:css("--red")});});}
-const CV={post:cv_post,story:cv_story,banner:cv_banner}; let state={type:'termine',weekIdx:0,teamIdx:0,gameIdx:0}; let weeksMem=[],gamesMem=[];
-function drawAll(fn){for(const k in CV){const cv=CV[k],c=cv.getContext("2d"); c.clearRect(0,0,cv.width,cv.height); fn(c,cv.width,cv.height);}}
-function fillWeekSelect(w){week.innerHTML=w.length?w.map((x,i)=>`<option value="${i}">${x.label}</option>`).join(""):`<option>keine</option>`; week.value=state.weekIdx;}
-async function render(){const type=state.type; drawAll((c,W,H)=>msgState(c,W,H,type==="termine"?"Spieltermine":"Lädt","Lädt...")); try{const action=type==="termine"?"getBbkSpielplan":"getBbkErgebnisse"; const merged=await loadSpiele(action); weeksMem=buildWeeks(merged); fillWeekSelect(weeksMem); const wk=weeksMem[state.weekIdx]; if(!wk){drawAll((c,W,H)=>msgState(c,W,H,"Spieltermine","Keine Termine gefunden - GAS liefert leer")); return;} const rows=wk.items.map(x=>({label:x._label,heim:x.Heim,gast:x.Gast,datum:x._date,zeit:x._time})); drawAll((c,W,H)=>drawListe(c,W,H,"Spieltermine",wk.label,rows)); ligainfo.innerHTML=`<b>${wk.label}</b> ${rows.length} Spiele`;}catch(e){console.error(e);}}
-function setType(t){state.type=t; document.querySelectorAll("#typeSeg button").forEach(b=>b.classList.toggle("active",b.dataset.type===t)); gameWrap.hidden=t!=="ergebnis"; weekWrap.hidden=!(t==="termine"||t==="ergebnisse"); teamWrap.hidden=t!=="tabelle"; render();}
-document.querySelectorAll("#typeSeg button").forEach(b=>b.addEventListener("click",()=>setType(b.dataset.type)));
-week.addEventListener("change",()=>{state.weekIdx=+week.value; render();});
-refresh.addEventListener("click",()=>{for(const k in cache) delete cache[k]; render();});
-document.documentElement.style.setProperty("--red",CFG.thema||"#b30000");
-document.getElementById('hdrLogo').src=CFG.logo; document.getElementById('hdrName').textContent=CFG.name;
-setType('termine');
+async function loadAll(){
+ document.getElementById('info').textContent="Lade 5 Ligen...";
+ const results=await Promise.all(CFG.teams.map(t=>fetchLiga(t)));
+ allGames=[].concat(...results); allGames.sort((a,b)=>a._dt-b._dt);
+ let filtered=allGames;
+ if(state.filter!=="ALL") filtered=filtered.filter(g=>g._label===state.filter);
+ let w=[]; let cur=null;
+ filtered.forEach(g=>{ if(!cur || (g._dt-cur.end)/86400000>6){ cur={items:[g], start:g._dt, end:g._dt, label:g._date}; w.push(cur);} else {cur.items.push(g); cur.end=g._dt;}});
+ weeks=w;
+ document.getElementById('week').innerHTML=weeks.map((x,i)=>`<option value="${i}">${x.label} (${x.items.length} Spiele)</option>`).join('') || `<option>keine Termine - Ligen sind leer</option>`;
+ if(state.week>=weeks.length) state.week=0;
+ document.getElementById('info').innerHTML=`<b>${allGames.length} Spiele gesamt</b><br>`+CFG.teams.map(t=>`${t.label} (${t.liga_id}): ${allGames.filter(g=>g.liga_id==t.liga_id).length} Spiele`).join('<br>');
+ draw();
+}
+function draw(){
+ const wk=weeks[state.week]; if(!wk){ for(let k in CV){let c=CV[k].getContext('2d'); c.fillStyle="#0B0E13"; c.fillRect(0,0,CV[k].width,CV[k].height); c.fillStyle="#8A97A6"; c.font="20px system-ui"; c.fillText("Keine Daten",50,100);} return;}
+ for(let key in CV){
+  let cv=CV[key]; let c=cv.getContext('2d'); let W=cv.width,H=cv.height,S=Math.min(W,H);
+  c.fillStyle="#0B0E13"; c.fillRect(0,0,W,H); c.fillStyle="#141A22"; c.fillRect(W*0.045,H*0.045,W*0.91,H*0.91);
+  c.fillStyle=CFG.thema; c.fillRect(W*0.045,H*0.045,W*0.91,12);
+  c.fillStyle="#fff"; c.font=`900 ${S*0.032}px system-ui`; c.fillText((wk.label+" - "+state.type).toUpperCase(),W*0.07,H*0.11);
+  let y=H*0.16; wk.items.slice(0,6).forEach(r=>{
+   c.fillStyle="#1B232E"; c.fillRect(W*0.07,y,W*0.86,H*0.07); c.fillStyle="#b30000"; c.fillRect(W*0.07,y,W*0.12,H*0.07);
+   c.fillStyle="#fff"; c.font=`800 ${S*0.018}px system-ui`; c.textAlign="center"; c.fillText(r._label,W*0.13,y+H*0.042);
+   c.textAlign="left"; c.fillStyle="#fff"; c.font=`700 ${S*0.018}px system-ui`; c.fillText(`${r.Heim} vs ${r.Gast}`,W*0.22,y+H*0.03);
+   c.fillStyle="#8A97A6"; c.font=`600 ${S*0.014}px system-ui`; c.fillText(`${r._date} ${r._time} ${r.Ergebnis||""}`,W*0.22,y+H*0.055); y+=H*0.08;
+  });
+ }
+}
+document.getElementById('teamFilter').innerHTML='<option value="ALL">Alle 5 Teams</option>'+CFG.teams.map(t=>`<option value="${t.label}">${t.label} - ${t.liga_id}</option>`).join('');
+document.getElementById('teamFilter').addEventListener('change',e=>{state.filter=e.target.value; loadAll();});
+document.getElementById('week').addEventListener('change',e=>{state.week=+e.target.value; draw();});
+document.getElementById('typeSeg').addEventListener('click',e=>{ if(e.target.tagName!=="BUTTON") return; document.querySelectorAll('#typeSeg button').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); state.type=e.target.dataset.type; loadAll();});
+document.getElementById('reload').addEventListener('click',()=>loadAll());
+document.getElementById('dl').addEventListener('click',()=>{ for(let k in CV){ CV[k].toBlob(b=>{ let a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`scorpions_${state.type}_${k}.png`; a.click(); }); }});
+loadAll();
 </script>
 </body>
 </html>
