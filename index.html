@@ -405,8 +405,6 @@ function drawErgebnis(c,W,H,sub,d){frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);
 function listenPlan(W,H,anzahl){const m=masse(W,H),hoehe=m.bot-m.top,platz=Math.max(1,Math.floor(hoehe/(m.S*.1))),seiten=Math.max(1,Math.ceil(anzahl/platz));
   return {m,hoehe,seiten,pro:Math.max(1,Math.ceil(anzahl/seiten))};}
 function listenSeiten(W,H,anzahl){return listenPlan(W,H,anzahl).seiten;}
-/* Kleinste Schriftgröße zwischen size und size*minFaktor, bei der passt(größe) stimmt */
-function noetigeGroesse(passt,size,minFaktor){let k=Math.round(size);const min=Math.round(size*minFaktor);while(k>min&&!passt(k))k--;return k;}
 const TRENNER="  –  ";
 function namenMasse(c,r,size){const H=String(r.heim||"").toUpperCase(),G=String(r.gast||"").toUpperCase(),gh=r.eigen==="heim"?900:700,gg=r.eigen==="gast"?900:700;
   return {H,G,gh,gg,bh:breite(c,H,size,gh),bg:breite(c,G,size,gg),tb:breite(c,TRENNER,size,700)};}
@@ -433,9 +431,8 @@ function drawListe(c,W,H,title,sub,rows,mode,seite){
     if(mode==="ergebnis"){if(r.sieg!=null)links=rechts-abz-S*.022;links-=breite(c,r.score,zahlG,900)+S*.03;}
     else if(r.zeit)links=rechts-breite(c,r.zeit,zahlG,900)-S*.03;
     return links-tx;});
-  /* EINE Schriftgröße für alle Teamnamen der Grafik: die kleinste, die eine Zeile braucht (nicht unter der Mindestgröße) */
-  const nameG=Math.min(nameBasis,...teil.map((r,i)=>noetigeGroesse(k=>{const a=namenMasse(c,r,k);
-    return gross?(a.bh<=platz[i]&&a.bg<=platz[i]):(a.bh+a.bg+a.tb<=platz[i]);},nameBasis,gross?.6:.66)));
+  /* Feste, gut lesbare Schriftgröße für alle Teamnamen der Grafik. Namen, die damit nicht passen, werden mit "…" gekürzt. */
+  const nameG=nameBasis;
   /* EINE Schriftgröße für alle Etiketten der Grafik: nach dem längsten Etikett */
   let etikettG=Math.round(Math.min(eh*.48,S*.03));
   while(etikettG>10&&teil.some(r=>breite(c,r.label,etikettG,900)>ew*.88))etikettG--;
