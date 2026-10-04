@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ONLANG Social</title>
 <style>
-  :root{--ink:#0B0E13;--surface:#141A22;--surface2:#1B232E;--line:#27313F;--red:#ff0000;--white:#fff;--muted:#8A97A6;--radius:14px;--font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  :root{--ink:#0B0E13;--surface:#141A22;--surface2:#1B232E;--line:#27313F;--red:#ff0000;--onred:#fff;--white:#fff;--muted:#8A97A6;--radius:14px;--font:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--ink);color:#fff;font-family:var(--font);-webkit-font-smoothing:antialiased;padding:22px}
   .top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
@@ -23,13 +23,13 @@
   .hint{font-size:11.5px;color:var(--muted);margin-top:6px}
   .seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
   .seg button{flex:1;background:transparent;border:0;color:var(--muted);font-weight:700;font-size:12px;padding:8px 4px;border-radius:7px;cursor:pointer;font-family:inherit}
-  .seg button.active{background:var(--red);color:#fff}
+  .seg button.active{background:var(--red);color:var(--onred)}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .ligainfo{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5}
   .ligainfo a{color:#9db6ff;text-decoration:none} .ligainfo b{color:#fff}
   .actions{display:flex;flex-direction:column;gap:10px;margin-top:16px}
   .btn{border:0;border-radius:10px;padding:11px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
-  .btn-primary{background:var(--red);color:#fff} .btn-ghost{background:var(--surface2);color:#fff;border:1px solid var(--line)}
+  .btn-primary{background:var(--red);color:var(--onred)} .btn-ghost{background:var(--surface2);color:#fff;border:1px solid var(--line)}
   .btn:active{transform:translateY(1px)} [hidden]{display:none!important}
   .previews{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
@@ -44,55 +44,54 @@
 <body>
   <div class="top">
     <img class="logo" alt="" hidden>
-    <div><h1>ONLANG Social</h1><div class="sub">Lädt Vereinsdaten …</div></div>
+    <div><h1>ONLANG Social</h1><div class="sub" data-t="laedtVerein">Lädt Vereinsdaten …</div></div>
   </div>
-  <div class="demo-note">
-    <b>Live aus Supabase.</b> Spiele und Tabellen werden erst beim Wechsel auf
-    Ergebnis / Ergebnisse / Termine / Tabelle geladen – nicht beim Start. Fällt die Verbindung aus, oben auf <b>Manuell</b> umschalten und Daten von Hand eingeben.
-  </div>
+  <div class="demo-note" data-th="hinweis"></div>
   <div class="layout">
     <div class="panel">
-      <h2>Einstellungen</h2>
-      <label>Datenquelle</label>
+      <h2 data-t="einstellungen">Einstellungen</h2>
+      <label data-t="datenquelle">Datenquelle</label>
       <div class="seg" id="srcSeg">
-        <button data-src="auto" class="active">Automatik (Supabase)</button>
-        <button data-src="manuell">Manuell</button>
+        <button data-src="auto" class="active" data-t="automatik">Automatik (Supabase)</button>
+        <button data-src="manuell" data-t="manuell">Manuell</button>
       </div>
-      <label>Grafik-Typ</label>
+      <label data-t="grafikTyp">Grafik-Typ</label>
       <div class="seg" id="typeSeg">
-        <button data-type="ergebnis">Ergebnis</button>
-        <button data-type="ergebnisse">Ergebnisse</button>
-        <button data-type="termine">Termine</button>
-        <button data-type="tabelle">Tabelle</button>
+        <button data-type="ergebnis" data-t="typErgebnis">Ergebnis</button>
+        <button data-type="ergebnisse" data-t="typErgebnisse">Ergebnisse</button>
+        <button data-type="termine" data-t="typTermine">Termine</button>
+        <button data-type="tabelle" data-t="typTabelle">Tabelle</button>
       </div>
-      <div id="gameWrap" hidden><label for="game">Spiel</label><select id="game"></select></div>
-      <div id="weekWrap" hidden><label for="week">Spielwoche</label><select id="week"></select>
-        <div class="hint">Alle Mannschaften dieser Woche auf einem Blatt.</div></div>
-      <div id="teamWrap" hidden><label for="team">Mannschaft</label><select id="team"></select></div>
-      <label for="sponsor">Sponsor</label><select id="sponsor"></select>
+      <div id="gameWrap" hidden><label for="game" data-t="spiel">Spiel</label><select id="game"></select></div>
+      <div id="weekWrap" hidden><label for="week" data-t="spielwoche">Spielwoche</label><select id="week"></select>
+        <div class="hint" data-t="wocheHinweis">Alle Mannschaften dieser Woche auf einem Blatt.</div></div>
+      <div id="teamWrap" hidden><label for="team" data-t="mannschaft">Mannschaft</label><select id="team"></select></div>
+      <div id="pageWrap" hidden><label for="page" data-t="seite">Seite</label><select id="page"></select>
+        <div class="hint" data-t="seiteHinweis">Zu viele Einträge für eine Grafik – sie werden auf mehrere verteilt.</div></div>
+      <label for="sponsor" data-t="sponsor">Sponsor</label><select id="sponsor"></select>
       <div id="ergebnisFields" hidden>
-        <label>Heimteam</label><input id="heim" type="text">
-        <label>Gastteam</label><input id="gast" type="text">
-        <div class="row2"><div><label>Punkte Heim</label><input id="ph" type="number" min="0"></div>
-        <div><label>Punkte Gast</label><input id="pg" type="number" min="0"></div></div>
-        <label>Datum</label><input id="datum" type="text">
-        <label>Ort</label><input id="ort" type="text">
+        <label data-t="heimteam">Heimteam</label><input id="heim" type="text">
+        <label data-t="gastteam">Gastteam</label><input id="gast" type="text">
+        <div class="row2"><div><label data-t="punkteHeim">Punkte Heim</label><input id="ph" type="number" min="0"></div>
+        <div><label data-t="punkteGast">Punkte Gast</label><input id="pg" type="number" min="0"></div></div>
+        <label data-t="datumFeld">Datum / Uhrzeit</label><input id="datum" type="text">
+        <label data-t="ort">Ort</label><input id="ort" type="text">
       </div>
       <div id="manualListWrap" hidden>
         <label id="manualTitleLbl">Spielwoche / Titel</label>
-        <input id="manualTitle" type="text" placeholder="z. B. 1. Spieltag">
-        <label id="manualRowsLbl">Zeilen (eine pro Spiel)</label>
+        <input id="manualTitle" type="text" data-tp="manTitelPH" placeholder="z. B. 1. Spieltag">
+        <label id="manualRowsLbl" data-t="manZeilenLbl">Zeilen (eine pro Spiel)</label>
         <textarea id="manualRows" rows="7"></textarea>
         <div class="hint" id="manualHint"></div>
       </div>
-      <div class="ligainfo" id="ligainfo">Wähle einen Grafik-Typ, um Live-Daten zu laden.</div>
+      <div class="ligainfo" id="ligainfo" data-t="infoStart">Wähle einen Grafik-Typ, um Live-Daten zu laden.</div>
       <div class="actions">
-        <button class="btn btn-ghost" id="refresh">Neu laden</button>
-        <button class="btn btn-primary" id="download">Alle 3 Formate herunterladen</button>
+        <button class="btn btn-ghost" id="refresh" data-t="neuLaden">Neu laden</button>
+        <button class="btn btn-primary" id="download" data-t="download">Alle Formate herunterladen</button>
       </div>
     </div>
     <div class="previews">
-      <p class="tip">Tipp: Vorschau anklicken öffnet die echte Auflösung (1080 px) im neuen Tab.</p>
+      <p class="tip" data-t="tipp">Tipp: Vorschau anklicken öffnet die echte Auflösung (1080 px) im neuen Tab.</p>
       <div class="card c-post"><p class="cap">Post 1:1</p><canvas id="cv_post" width="1080" height="1080"></canvas></div>
       <div class="card c-story"><p class="cap">Story 9:16</p><canvas id="cv_story" width="1080" height="1920"></canvas></div>
       <div class="card c-banner"><p class="cap">Banner 16:9</p><canvas id="cv_banner" width="1920" height="1080"></canvas></div>
@@ -104,26 +103,132 @@ const SUPABASE_URL="https://ccwlglszhwvbhzhdtxtl.supabase.co";
 /* Hier NUR den öffentlichen publishable Key eintragen (sb_publishable_…), NIEMALS einen geheimen Schlüssel. */
 const SUPABASE_KEY="sb_publishable_hFwqCDf1pMIYkXMq7a0jyQ_XcweL-mS";
 
-/* ===== Verein per URL ?kunde=ID – kein Standard, kein Rückfall ===== */
-const KUNDE=(new URLSearchParams(location.search).get("kunde")||"").trim().toUpperCase();
+/* ===== Verein per URL ?kunde=ID – kein Standard, kein Rückfall. ?lang=de|hu|en überschreibt die Sprache. ===== */
+const PARAMETER=new URLSearchParams(location.search);
+const KUNDE=(PARAMETER.get("kunde")||"").trim().toUpperCase();
+const LANG_PARAMETER=(PARAMETER.get("lang")||"").trim().toLowerCase();
 let VEREIN=null;      /* Zeile aus kunden */
 let SPONSOREN=[];     /* aktive Sponsoren, sortiert nach position */
 let sponsorIdx=0;
-let startFehler="";   /* gesetzt, wenn der Verein nicht geladen werden konnte */
+let startFehler=null; /* Funktion, die die Fehlermeldung in der aktuellen Sprache liefert */
 
-/* ===== Texte in den Grafiken nach kunden.sprache (unbekannt → de) ===== */
+/* ===== Wörterbuch: ALLE Texte der Oberfläche und der Grafiken, je Sprache =====
+   Sprache: ?lang=, sonst kunden.sprache, unbekannt → de. */
 const TEXTE={
- de:{saison:"Saison",endstand:"Endstand",praesentiert:"Präsentiert von",ergebnisse:"Ergebnisse",termine:"Spieltermine",tabelle:"Tabelle",team:"TEAM",sp:"SP",sn:"S-N",pkt:"PKT",uhr:" Uhr",datum:(j,m,t)=>t+"."+m+"."+j},
- hu:{saison:"Szezon",endstand:"Végeredmény",praesentiert:"Támogatónk",ergebnisse:"Eredmények",termine:"Mérkőzések",tabelle:"Tabella",team:"CSAPAT",sp:"M",sn:"GY-V",pkt:"PT",uhr:"",datum:(j,m,t)=>j+"."+m+"."+t+"."},
- en:{saison:"Season",endstand:"Final score",praesentiert:"Presented by",ergebnisse:"Results",termine:"Fixtures",tabelle:"Standings",team:"TEAM",sp:"GP",sn:"W-L",pkt:"PTS",uhr:"",datum:(j,m,t)=>t+"/"+m+"/"+j}
+ de:{
+  /* Grafiken */
+  saison:"Saison",endstand:"Endstand",praesentiert:"Präsentiert von",ergebnisse:"Ergebnisse",termine:"Spieltermine",tabelle:"Tabelle",
+  team:"TEAM",sp:"SP",sn:"S-N",pkt:"PKT",uhr:" Uhr",datum:(j,m,t)=>t+"."+m+"."+j,
+  sieg:"SIEG",niederlage:"NIEDERLAGE",abzSieg:"S",abzNiederlage:"N",
+  /* Oberfläche */
+  laedtVerein:"Lädt Vereinsdaten …",
+  hinweis:"<b>Live aus Supabase.</b> Spiele und Tabellen werden erst beim Wechsel auf Ergebnis / Ergebnisse / Termine / Tabelle geladen – nicht beim Start. Fällt die Verbindung aus, oben auf <b>Manuell</b> umschalten und Daten von Hand eingeben.",
+  einstellungen:"Einstellungen",datenquelle:"Datenquelle",automatik:"Automatik (Supabase)",manuell:"Manuell",grafikTyp:"Grafik-Typ",
+  typErgebnis:"Ergebnis",typErgebnisse:"Ergebnisse",typTermine:"Termine",typTabelle:"Tabelle",
+  spiel:"Spiel",spielwoche:"Spielwoche",wocheHinweis:"Alle Mannschaften dieser Woche auf einem Blatt.",mannschaft:"Mannschaft",
+  seite:"Seite",seiteHinweis:"Zu viele Einträge für eine Grafik – sie werden auf mehrere verteilt.",sponsor:"Sponsor",
+  heimteam:"Heimteam",gastteam:"Gastteam",punkteHeim:"Punkte Heim",punkteGast:"Punkte Gast",datumFeld:"Datum / Uhrzeit",ort:"Ort",
+  infoStart:"Wähle einen Grafik-Typ, um Live-Daten zu laden.",neuLaden:"Neu laden",download:"Alle Formate herunterladen",
+  tipp:"Tipp: Vorschau anklicken öffnet die echte Auflösung (1080 px) im neuen Tab.",
+  keine:"– keine –",keinSponsor:"– kein aktiver Sponsor –",
+  waehle:"Wähle Ergebnis, Ergebnisse, Termine oder Tabelle.",waehleSub:"Live-Daten werden erst bei Auswahl geladen.",
+  laedt:"Lädt Live-Daten …",keineTabelle:"Noch keine Tabellendaten.",keineDaten:"Keine Daten.",
+  keineSpiele:"Keine Spiele im Zeitraum.",keineErgebnisse:"Keine Ergebnisse im Zeitraum.",
+  fehler:"Fehler",nichtErreichbar:"Live-Daten nicht erreichbar.",pruefe:"Prüfe Verbindung. Details in der Konsole.",fehlerLaden:"Fehler beim Laden – Konsole prüfen.",
+  keinVerein:"Kein Verein angegeben.",vereinNichtGefunden:k=>"Verein "+k+" nicht gefunden.",vereinNichtErreichbar:"Vereinsdaten nicht erreichbar.",
+  adresseHinweis:"Adresse mit ?kunde=… aufrufen, z. B. ?kunde=V002",
+  wortTeams:"Teams",wortSpiele:"Spiele",wortWochen:"Wochen live",wortGrafiken:"Grafiken",
+  exportBlockiert:"Export blockiert: Ein Logo liegt auf einer Adresse, die den Bild-Export nicht erlaubt (z. B. imgur).",
+  downloadBlockiert:"Download blockiert: Ein Logo erlaubt den Bild-Export nicht.",
+  manModus:"Manueller Modus",manKeineZeilen:"noch keine Zeilen",wortZeilen:"Zeilen",zeilenEingeben:"Zeilen eingeben …",
+  manHint:"Eine Zeile pro Eintrag · Felder mit <b>;</b> trennen.",manTitelPH:"z. B. 1. Spieltag",manZeilenLbl:"Zeilen (eine pro Spiel)",manuellTitel:"Manuell",
+  manFelder:{
+   ergebnisse:{title:"Titel (z. B. Ergebnisse der Woche)",rows:"Mannschaft; Heim; Gast; Ergebnis",ex:"U18; SG RW Gierath; TG Neuss; 78:65"},
+   termine:{title:"Spielwoche / Titel",rows:"Mannschaft; Heim; Gast; Datum; Uhrzeit",ex:"U18; SG RW Gierath; TG Neuss; 04.10.2026; 15:00"},
+   tabelle:{title:"Liga / Titel",rows:"Platz; Team; Spiele; Siege; Niederlagen; Punkte",ex:"1; SG RW Gierath; 5; 5; 0; 10"}}
+ },
+ hu:{
+  saison:"Szezon",endstand:"Végeredmény",praesentiert:"Támogatónk",ergebnisse:"Eredmények",termine:"Mérkőzések",tabelle:"Tabella",
+  team:"CSAPAT",sp:"M",sn:"GY-V",pkt:"PT",uhr:"",datum:(j,m,t)=>j+"."+m+"."+t+".",
+  sieg:"GYŐZELEM",niederlage:"VERESÉG",abzSieg:"GY",abzNiederlage:"V",
+  laedtVerein:"Egyesületi adatok betöltése …",
+  hinweis:"<b>Élő adatok a Supabase-ből.</b> A mérkőzések és a tabellák csak akkor töltődnek be, amikor az Eredmény / Eredmények / Mérkőzések / Tabella típusra váltasz – induláskor nem. Ha nincs kapcsolat, válts fent <b>Kézi</b> módra, és add meg az adatokat kézzel.",
+  einstellungen:"Beállítások",datenquelle:"Adatforrás",automatik:"Automatikus (Supabase)",manuell:"Kézi",grafikTyp:"Grafika típusa",
+  typErgebnis:"Eredmény",typErgebnisse:"Eredmények",typTermine:"Mérkőzések",typTabelle:"Tabella",
+  spiel:"Mérkőzés",spielwoche:"Játékhét",wocheHinweis:"A hét összes csapata egy lapon.",mannschaft:"Csapat",
+  seite:"Oldal",seiteHinweis:"Túl sok bejegyzés egy grafikához – több grafikára kerülnek.",sponsor:"Támogató",
+  heimteam:"Hazai csapat",gastteam:"Vendégcsapat",punkteHeim:"Hazai pontok",punkteGast:"Vendég pontok",datumFeld:"Dátum / időpont",ort:"Helyszín",
+  infoStart:"Válassz grafikatípust az élő adatok betöltéséhez.",neuLaden:"Újratöltés",download:"Összes formátum letöltése",
+  tipp:"Tipp: az előnézetre kattintva a valódi felbontás (1080 px) új lapon nyílik meg.",
+  keine:"– nincs –",keinSponsor:"– nincs aktív támogató –",
+  waehle:"Válassz: Eredmény, Eredmények, Mérkőzések vagy Tabella.",waehleSub:"Az élő adatok csak a kiválasztás után töltődnek be.",
+  laedt:"Élő adatok betöltése …",keineTabelle:"Még nincs tabellaadat.",keineDaten:"Nincs adat.",
+  keineSpiele:"Nincs mérkőzés ebben az időszakban.",keineErgebnisse:"Nincs eredmény ebben az időszakban.",
+  fehler:"Hiba",nichtErreichbar:"Az élő adatok nem érhetők el.",pruefe:"Ellenőrizd a kapcsolatot. Részletek a konzolban.",fehlerLaden:"Hiba a betöltéskor – nézd meg a konzolt.",
+  keinVerein:"Nincs megadva egyesület.",vereinNichtGefunden:k=>"A(z) "+k+" egyesület nem található.",vereinNichtErreichbar:"Az egyesület adatai nem érhetők el.",
+  adresseHinweis:"A címet ?kunde=… paraméterrel hívd meg, pl. ?kunde=HU001",
+  wortTeams:"csapat",wortSpiele:"mérkőzés",wortWochen:"hét élőben",wortGrafiken:"grafika",
+  exportBlockiert:"Az exportálás le van tiltva: az egyik logó olyan címen van, amely nem engedi a kép exportálását (pl. imgur).",
+  downloadBlockiert:"A letöltés le van tiltva: az egyik logó nem engedi a kép exportálását.",
+  manModus:"Kézi mód",manKeineZeilen:"még nincsenek sorok",wortZeilen:"sor",zeilenEingeben:"Sorok megadása …",
+  manHint:"Bejegyzésenként egy sor · a mezőket <b>;</b> választja el.",manTitelPH:"pl. 1. forduló",manZeilenLbl:"Sorok (mérkőzésenként egy)",manuellTitel:"Kézi",
+  manFelder:{
+   ergebnisse:{title:"Cím (pl. A hét eredményei)",rows:"Csapat; Hazai; Vendég; Eredmény",ex:"U18; Darazsak; MAFC; 78:65"},
+   termine:{title:"Játékhét / cím",rows:"Csapat; Hazai; Vendég; Dátum; Időpont",ex:"U18; Darazsak; MAFC; 2026.10.04.; 15:00"},
+   tabelle:{title:"Bajnokság / cím",rows:"Helyezés; Csapat; Mérkőzések; Győzelmek; Vereségek; Pontok",ex:"1; Darazsak; 5; 5; 0; 10"}}
+ },
+ en:{
+  saison:"Season",endstand:"Final score",praesentiert:"Presented by",ergebnisse:"Results",termine:"Fixtures",tabelle:"Standings",
+  team:"TEAM",sp:"GP",sn:"W-L",pkt:"PTS",uhr:"",datum:(j,m,t)=>t+"/"+m+"/"+j,
+  sieg:"WIN",niederlage:"LOSS",abzSieg:"W",abzNiederlage:"L",
+  laedtVerein:"Loading club data …",
+  hinweis:"<b>Live from Supabase.</b> Games and standings are only loaded when you switch to Result / Results / Fixtures / Standings – not at start. If the connection fails, switch to <b>Manual</b> above and enter the data by hand.",
+  einstellungen:"Settings",datenquelle:"Data source",automatik:"Automatic (Supabase)",manuell:"Manual",grafikTyp:"Graphic type",
+  typErgebnis:"Result",typErgebnisse:"Results",typTermine:"Fixtures",typTabelle:"Standings",
+  spiel:"Game",spielwoche:"Game week",wocheHinweis:"All teams of this week on one sheet.",mannschaft:"Team",
+  seite:"Page",seiteHinweis:"Too many entries for one graphic – they are spread over several.",sponsor:"Sponsor",
+  heimteam:"Home team",gastteam:"Away team",punkteHeim:"Home points",punkteGast:"Away points",datumFeld:"Date / time",ort:"Venue",
+  infoStart:"Choose a graphic type to load live data.",neuLaden:"Reload",download:"Download all formats",
+  tipp:"Tip: click a preview to open the real resolution (1080 px) in a new tab.",
+  keine:"– none –",keinSponsor:"– no active sponsor –",
+  waehle:"Choose Result, Results, Fixtures or Standings.",waehleSub:"Live data is only loaded after you choose.",
+  laedt:"Loading live data …",keineTabelle:"No standings yet.",keineDaten:"No data.",
+  keineSpiele:"No games in this period.",keineErgebnisse:"No results in this period.",
+  fehler:"Error",nichtErreichbar:"Live data not available.",pruefe:"Check the connection. Details in the console.",fehlerLaden:"Error while loading – check the console.",
+  keinVerein:"No club given.",vereinNichtGefunden:k=>"Club "+k+" not found.",vereinNichtErreichbar:"Club data not available.",
+  adresseHinweis:"Open the address with ?kunde=…, e.g. ?kunde=V002",
+  wortTeams:"teams",wortSpiele:"games",wortWochen:"weeks live",wortGrafiken:"graphics",
+  exportBlockiert:"Export blocked: a logo is hosted at an address that does not allow image export (e.g. imgur).",
+  downloadBlockiert:"Download blocked: a logo does not allow image export.",
+  manModus:"Manual mode",manKeineZeilen:"no rows yet",wortZeilen:"rows",zeilenEingeben:"Enter rows …",
+  manHint:"One row per entry · separate fields with <b>;</b>.",manTitelPH:"e.g. Matchday 1",manZeilenLbl:"Rows (one per game)",manuellTitel:"Manual",
+  manFelder:{
+   ergebnisse:{title:"Title (e.g. Results of the week)",rows:"Team; Home; Away; Score",ex:"U18; SG RW Gierath; TG Neuss; 78:65"},
+   termine:{title:"Game week / title",rows:"Team; Home; Away; Date; Time",ex:"U18; SG RW Gierath; TG Neuss; 04/10/2026; 15:00"},
+   tabelle:{title:"League / title",rows:"Rank; Team; Games; Wins; Losses; Points",ex:"1; SG RW Gierath; 5; 5; 0; 10"}}
+ }
 };
-let T=TEXTE.de;
+let SPRACHE=TEXTE[LANG_PARAMETER]?LANG_PARAMETER:"de";
+let T=TEXTE[SPRACHE];
+function setzeSprache(vereinsSprache){
+  const v=String(vereinsSprache||"").trim().toLowerCase();
+  SPRACHE=TEXTE[LANG_PARAMETER]?LANG_PARAMETER:(TEXTE[v]?v:"de");
+  T=TEXTE[SPRACHE];
+  texteAnwenden();
+}
+/* Schreibt die Texte des Wörterbuchs in die Seite (data-t = Text, data-th = HTML, data-tp = Platzhalter) */
+function texteAnwenden(){
+  document.documentElement.lang=SPRACHE;
+  document.querySelectorAll("[data-t]").forEach(e=>{if(e.id==="ligainfo"&&state.type)return;if(e.dataset.t==="laedtVerein"&&VEREIN)return;e.textContent=T[e.dataset.t];});
+  document.querySelectorAll("[data-th]").forEach(e=>{e.innerHTML=T[e.dataset.th];});
+  document.querySelectorAll("[data-tp]").forEach(e=>{e.placeholder=T[e.dataset.tp];});
+}
 
-const LOGO=new Image(); LOGO.crossOrigin="anonymous"; LOGO.onload=()=>render();
+const LOGO=new Image(); LOGO.crossOrigin="anonymous"; LOGO.onload=()=>{logoAusschnitt=null;render();};
 function aktiverSponsor(){const s=SPONSOREN[sponsorIdx];return s?[s]:[];}
 const _lc={};function logoImg(u){if(!u)return null;if(!_lc[u]){const im=new Image();im.crossOrigin="anonymous";im.onload=()=>render();im.onerror=()=>{im.failed=true;render();};im.src=u;_lc[u]=im;}return _lc[u];}
 function kurz(){return (VEREIN&&(VEREIN.short_name||VEREIN.verein_name))||"";}
-/* ===== Farbe in den Grafiken (Spielstand, Akzentbalken, Ecke, Etikett) =====
+/* ===== Farbe in den Grafiken (Spielstand, Akzentbalken, Ecke, Etikett, eigenes Team) =====
    1. kunden.akzent_farbe, 2. sonst kunden.thema_farbe, 3. ist die Farbe auf dem
    dunklen Hintergrund zu kontrastarm (relative Helligkeit unter 0,2), dann Weiß. */
 const MIN_HELLIGKEIT=0.2;
@@ -135,10 +240,11 @@ function waehleAkzent(v){const f=String((v&&(v.akzent_farbe||v.thema_farbe))||""
 function akzent(){return AKZENT;}
 /* Textfarbe auf einer Fläche in Akzentfarbe: schwarz auf hellen, weiß auf dunklen Flächen */
 function aufAkzent(){const l=helligkeit(AKZENT);return (l!==null&&l>0.4)?"#0B0E13":"#ffffff";}
+const GRAU_HELL="#C9D1DB",GRAU="#8A97A6";
 /* Saison aus dem heutigen Datum: ab Juli beginnt die neue Saison */
 function saison(){const d=new Date(),j=d.getFullYear(),s=d.getMonth()>=6?j:j-1;return T.saison+" "+s+"/"+String(s+1).slice(2);}
 /* Dateiname der PNGs: Kurzname des Vereins, sonst die Kunden-ID */
-function dateiName(){const s=String((VEREIN&&VEREIN.short_name)||KUNDE||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");return s||KUNDE.toLowerCase()||"onlang";}
+function dateiName(){const s=String((VEREIN&&VEREIN.short_name)||KUNDE||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");return s||KUNDE.toLowerCase()||"onlang";}
 /* Info-Link je Anbieter der Spieldaten */
 const ANBIETER={bbn:["basketball-bund.net","https://www.basketball-bund.net/"],mkosz:["mkosz.hu","https://mkosz.hu/"]};
 function anbieterLinks(liste){return Array.from(new Set(liste)).filter(a=>ANBIETER[a]).map(a=>`<br><a href="${ANBIETER[a][1]}" target="_blank" rel="noopener">${ANBIETER[a][0]} ↗</a>`).join("");}
@@ -164,10 +270,12 @@ async function ladeSponsoren(){
 function datumTeile(d){const m=String(d||"").match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(!m)return{date:"",dt:null};
   return{date:T.datum(m[1],m[2],m[3]),dt:new Date(+m[1],+m[2]-1,+m[3])};}
+/* Sieg (true), Niederlage (false) oder unbekannt/unentschieden (null) aus Sicht des eigenen Teams */
+function siegVon(eigen,ph,pg){if(!eigen||ph==null||pg==null||ph===""||pg===""||+ph===+pg)return null;return eigen==="heim"?+ph>+pg:+pg>+ph;}
 /* Eigenes Team (über heimspiel) wird mit dem Kurznamen des Vereins gezeigt */
-function mitAnzeige(x){const p=datumTeile(x.datum),k=kurz();
+function mitAnzeige(x){const p=datumTeile(x.datum),k=kurz(),eigen=x.heimspiel===true?"heim":x.heimspiel===false?"gast":null;
   return Object.assign({},x,{_label:x.mannschaft_kurz||"",_date:p.date,_dt:p.dt,_time:String(x.uhrzeit||"").slice(0,5),
-    _heim:(x.heimspiel===true&&k)?k:x.heim,_gast:(x.heimspiel===false&&k)?k:x.gast,
+    _heim:(eigen==="heim"&&k)?k:x.heim,_gast:(eigen==="gast"&&k)?k:x.gast,_eigen:eigen,_sieg:siegVon(eigen,x.punkte_heim,x.punkte_gast),
     _score:(x.punkte_heim!=null&&x.punkte_gast!=null)?x.punkte_heim+":"+x.punkte_gast:""});}
 async function ladeAlleSpiele(){
   if(cache.spiele)return cache.spiele;
@@ -194,56 +302,201 @@ function buildWeeks(items){const w=[];let cur=null;
   return w.map((g,i)=>{const a=g.items[0]._date,b=g.items[g.items.length-1]._date;
     return {id:String(i),label:a===b?a:(a+" – "+b),items:g.items};});}
 
-/* ===== Canvas ===== */
+/* ===== Canvas: Grundbausteine ===== */
 function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
 function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
 function sp(c,px){try{c.letterSpacing=px+"px";}catch(e){}}
-function txt(c,s,x,y,o){const z=Math.round(o.size),w=o.weight||700;c.save();if(o.upper)s=String(s).toUpperCase();c.font=`${w} ${z}px ${css("--font")}`;c.fillStyle=o.color||"#fff";c.textAlign=o.align||"left";c.textBaseline=o.baseline||"alphabetic";sp(c,o.spacing||0);if(o.maxW){let k=z;while(c.measureText(s).width>o.maxW&&k>10){k--;c.font=`${w} ${k}px ${css("--font")}`;}}c.fillText(s,Math.round(x),Math.round(y));c.restore();}
+function schrift(c,size,weight){c.font=`${weight||700} ${Math.round(size)}px ${css("--font")}`;}
+function txt(c,s,x,y,o){const z=Math.round(o.size),w=o.weight||700;c.save();if(o.upper)s=String(s).toUpperCase();schrift(c,z,w);c.fillStyle=o.color||"#fff";c.textAlign=o.align||"left";c.textBaseline=o.baseline||"alphabetic";sp(c,o.spacing||0);if(o.maxW){let k=z;while(c.measureText(s).width>o.maxW&&k>10){k--;schrift(c,k,w);}}c.fillText(s,Math.round(x),Math.round(y));c.restore();}
+function breite(c,s,size,weight){c.save();sp(c,0);schrift(c,size,weight);const b=c.measureText(String(s)).width;c.restore();return b;}
+/* Text in eine Breite einpassen: erst bis zur Mindestgröße verkleinern, dann mit "…" kürzen */
+function einpassen(c,s,maxW,size,weight,minFaktor){s=String(s==null?"":s);let k=Math.round(size);const min=Math.round(size*(minFaktor||.72));
+  while(k>min&&breite(c,s,k,weight)>maxW)k--;
+  if(breite(c,s,k,weight)>maxW){while(s.length>1&&breite(c,s+"…",k,weight)>maxW)s=s.slice(0,-1);s=s.replace(/[\s–-]+$/,"")+"…";}
+  return {text:s,size:k};}
+/* Text auf höchstens zwei Zeilen umbrechen; was nicht passt, wird mit "…" gekürzt */
+function zweiZeilen(c,s,maxW,size,weight){const worte=String(s||"").split(/\s+/).filter(Boolean),zeilen=[];let akt="";
+  for(let i=0;i<worte.length;i++){const versuch=akt?akt+" "+worte[i]:worte[i];
+    if(breite(c,versuch,size,weight)<=maxW||!akt){akt=versuch;continue;}
+    if(zeilen.length===1){akt=akt+" "+worte.slice(i).join(" ");break;}
+    zeilen.push(akt);akt=worte[i];}
+  zeilen.push(akt);
+  return zeilen.slice(0,2).map(z=>einpassen(c,z,maxW,size,weight,1).text);}
 function splitLines(s){s=String(s||"");var o=[];s.split("\n").forEach(function(a){a.split("\\n").forEach(function(b){o.push(b);});});return o.filter(function(z){return z.trim().length;});}
-function frame(c,W,H){const R=akzent(),S=Math.min(W,H);c.fillStyle="#0B0E13";c.fillRect(0,0,W,H);c.fillStyle="#10151C";rr(c,W*.045,H*.045,W*.91,H*.91,S*.03);c.fill();c.save();c.fillStyle=R;c.beginPath();c.moveTo(W,0);c.lineTo(W,H*.12);c.lineTo(W*.83,0);c.closePath();c.fill();c.restore();drawSponsors(c,W,H);}
-function headerBrand(c,W,H){const S=Math.min(W,H),ph=S*.12,pad=S*.016,x=W*.07,y=H*.055,lw=(LOGO.naturalWidth||116),lh=(LOGO.naturalHeight||114),ih=ph-2*pad,iw=ih*(lw/lh),pw=iw+2*pad;c.save();c.shadowColor="rgba(0,0,0,.35)";c.shadowBlur=S*.015;c.shadowOffsetY=S*.004;c.fillStyle="#fff";rr(c,x,y,pw,ph,S*.018);c.fill();c.restore();if(LOGO.complete&&LOGO.naturalWidth)c.drawImage(LOGO,Math.round(x+pad),Math.round(y+pad),Math.round(iw),Math.round(ih));return {tx:x+pw+S*.03,cy:y+ph/2};}
-function eyebrow(c,W,H,label,sub){const S=Math.min(W,H),b=headerBrand(c,W,H);c.fillStyle=akzent();rr(c,b.tx,b.cy-S*.03,S*.011,S*.06,3);c.fill();txt(c,label,b.tx+S*.028,b.cy-S*.006,{size:S*.032,weight:900,spacing:2,upper:true});txt(c,sub,b.tx+S*.028,b.cy+S*.03,{size:S*.021,weight:600,color:"#8A97A6"});}
-function drawSponsors(c,W,H){const S=Math.min(W,H),sps=aktiverSponsor();txt(c,T.praesentiert,W/2,H*.767,{size:S*.02,weight:700,align:"center",color:"#8A97A6",spacing:4,upper:true});const x=W*.09,y=H*.795,w=W*.82,h=H*.13,pad=h*.13;c.save();c.shadowColor="rgba(0,0,0,.3)";c.shadowBlur=S*.015;c.shadowOffsetY=S*.004;c.fillStyle="#fff";rr(c,x,y,w,h,S*.018);c.fill();c.restore();if(!sps.length){txt(c,"ONLANG",W/2,y+h*.62,{size:h*.42,weight:900,align:"center",color:"#0B0E13",spacing:3});return;}const s=sps[0],img=logoImg(s.logo_url),ls=splitLines(s.banner_text),ok=img&&img.complete&&img.naturalWidth&&!img.failed;if(ok){const ar=img.naturalWidth/img.naturalHeight;let ih=h-2*pad,iw=ih*ar,mx=w*.26;if(iw>mx){iw=mx;ih=iw/ar;}const lx=x+w*.045,ly=y+(h-ih)/2;c.drawImage(img,Math.round(lx),Math.round(ly),Math.round(iw),Math.round(ih));const tX=lx+iw+w*.05,mw=x+w-tX-w*.045;if(ls.length>1){txt(c,ls[0],tX,y+h*.42,{size:h*.27,weight:900,color:"#0B0E13",maxW:mw});txt(c,ls[1],tX,y+h*.73,{size:h*.21,weight:600,color:"#2A3138",maxW:mw});}else txt(c,ls[0]||"",tX,y+h*.6,{size:h*.32,weight:900,color:"#0B0E13",maxW:mw});}else{txt(c,ls[0]||"ONLANG",W/2,y+(ls[1]?h*.42:h*.6),{size:h*.28,weight:900,align:"center",color:"#0B0E13",maxW:w*.9});if(ls[1])txt(c,ls[1],W/2,y+h*.73,{size:h*.21,weight:600,align:"center",color:"#2A3138",maxW:w*.9});}}
-function msgState(c,W,H,label,msg,sub){frame(c,W,H);eyebrow(c,W,H,label,saison());const S=Math.min(W,H);txt(c,msg,W/2,H*.45,{size:S*.032,weight:800,align:"center",color:"#8A97A6",maxW:W*.82});if(sub)txt(c,sub,W/2,H*.52,{size:S*.022,weight:600,align:"center",color:"#5A6675",maxW:W*.82});}
 
-function drawErgebnis(c,W,H,sub,d){frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);const land=W/H>1.2,cx=W/2,S=Math.min(W,H);if(land){const my=H*.44;txt(c,d.heim,W*.20,my,{size:S*.05,weight:900,align:"center",baseline:"middle",maxW:W*.30,upper:true});txt(c,d.gast,W*.80,my,{size:S*.05,weight:900,align:"center",baseline:"middle",maxW:W*.30,upper:true});txt(c,`${d.ph} : ${d.pg}`,cx,my,{size:S*.12,weight:900,align:"center",baseline:"middle",color:akzent()});txt(c,"vs",cx,my-S*.11,{size:S*.024,weight:700,align:"center",color:"#8A97A6",upper:true});txt(c,d.datum,cx,H*.60,{size:S*.026,weight:700,align:"center"});txt(c,d.ort,cx,H*.635,{size:S*.021,weight:600,align:"center",color:"#8A97A6"});}else{const y=H*.33;txt(c,d.heim,cx,y,{size:S*.058,weight:900,align:"center",maxW:W*.82,upper:true});txt(c,`${d.ph} : ${d.pg}`,cx,y+S*.16,{size:S*.185,weight:900,align:"center",color:akzent()});txt(c,"vs",cx,y+S*.212,{size:S*.026,weight:700,align:"center",color:"#8A97A6",upper:true});txt(c,d.gast,cx,y+S*.27,{size:S*.058,weight:900,align:"center",maxW:W*.82,upper:true});txt(c,d.datum,cx,y+S*.35,{size:S*.026,weight:700,align:"center"});txt(c,d.ort,cx,y+S*.385,{size:S*.021,weight:600,align:"center",color:"#8A97A6"});}}
-function drawListe(c,W,H,title,sub,rows,mode){frame(c,W,H);eyebrow(c,W,H,title,sub);const S=Math.min(W,H),x=W*.09,w=W*.82;rows=rows.slice(0,W/H>1.2?4:6);const top=H*.24,rh=(H*.48)/Math.max(rows.length,1);rows.forEach((r,i)=>{const y=top+i*rh,hn=r.heim,gn=r.gast;c.fillStyle=i%2?"#161D26":"#1B232E";rr(c,x,y,w,rh*.86,10);c.fill();c.fillStyle=akzent();rr(c,x+w*.02,y+rh*.20,w*.11,rh*.46,7);c.fill();txt(c,r.label,x+w*.075,y+rh*.53,{size:S*.024,weight:900,align:"center",color:aufAkzent(),maxW:w*.10});if(mode==="ergebnis"){txt(c,hn+"  –  "+gn,x+w*.17,y+rh*.55,{size:S*.022,weight:700,maxW:w*.5,upper:true});txt(c,r.score,x+w*.97,y+rh*.55,{size:S*.03,weight:900,align:"right",color:akzent()});}else{txt(c,hn+"  –  "+gn,x+w*.17,y+rh*.44,{size:S*.022,weight:700,maxW:w*.6,upper:true});txt(c,r.datum,x+w*.17,y+rh*.70,{size:S*.017,weight:600,color:"#8A97A6"});txt(c,r.zeit,x+w*.97,y+rh*.53,{size:S*.03,weight:900,align:"right",color:akzent()});}});}
-function drawTabelle(c,W,H,sub,rows){frame(c,W,H);eyebrow(c,W,H,T.tabelle,sub);const S=Math.min(W,H),x=W*.09,w=W*.82;rows=rows.slice(0,W/H>1.2?6:8);const top=H*.24,rh=(H*.48)/Math.max(rows.length,1),cP=x+w*.02,cT=x+w*.11,cSp=x+w*.70,cB=x+w*.82,cPk=x+w*.97;txt(c,"#",cP,top-rh*.25,{size:S*.018,weight:800,color:"#8A97A6"});txt(c,T.team,cT,top-rh*.25,{size:S*.018,weight:800,color:"#8A97A6"});txt(c,T.sp,cSp,top-rh*.25,{size:S*.018,weight:800,align:"center",color:"#8A97A6"});txt(c,T.sn,cB,top-rh*.25,{size:S*.018,weight:800,align:"center",color:"#8A97A6"});txt(c,T.pkt,cPk,top-rh*.25,{size:S*.018,weight:800,align:"right",color:"#8A97A6"});rows.forEach((r,i)=>{const y=top+i*rh,mine=r.mine===true;c.fillStyle=mine?akzent():(i%2?"#161D26":"#1B232E");rr(c,x,y,w,rh*.84,9);c.fill();const mut=mine?aufAkzent():"#8A97A6",fg=mine?aufAkzent():"#fff";txt(c,r.pos,cP,y+rh*.55,{size:S*.026,weight:900,color:fg});txt(c,r.team,cT,y+rh*.55,{size:S*.023,weight:mine?900:700,maxW:w*.54,upper:true,color:fg});txt(c,r.sp,cSp,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.s+"-"+r.n,cB,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.pkt,cPk,y+rh*.55,{size:S*.028,weight:900,align:"right",color:fg});});}
+/* Maße: Kopf oben, Sponsorkasten unten, dazwischen der Inhalt */
+function masse(W,H){const S=Math.min(W,H),kopfY=H*.055,kopfH=S*.12,sH=S*.105,sY=H*.955-S*.032-sH,sLabelY=sY-S*.022;
+  return {S,kopfY,kopfH,sH,sY,sLabelY,x:W*.09,w:W*.82,top:kopfY+kopfH+S*.04,bot:sLabelY-S*.045};}
+
+function frame(c,W,H){const S=Math.min(W,H);c.fillStyle="#0B0E13";c.fillRect(0,0,W,H);c.fillStyle="#10151C";rr(c,W*.045,H*.045,W*.91,H*.91,S*.03);c.fill();c.save();c.fillStyle=akzent();c.beginPath();c.moveTo(W,0);c.lineTo(W,H*.12);c.lineTo(W*.83,0);c.closePath();c.fill();c.restore();drawSponsors(c,W,H);}
+
+/* Vereinslogo: leeren (weißen oder durchsichtigen) Rand im Bild wegschneiden, damit das Logo den Kasten füllt */
+let logoAusschnitt=null;
+function logoBereich(){
+  if(logoAusschnitt)return logoAusschnitt;
+  const lw=LOGO.naturalWidth||0,lh=LOGO.naturalHeight||0,ganz={x:0,y:0,w:lw,h:lh};
+  if(!lw||!lh)return ganz;
+  logoAusschnitt=ganz;
+  try{
+    const f=Math.min(1,160/Math.max(lw,lh)),w=Math.max(1,Math.round(lw*f)),h=Math.max(1,Math.round(lh*f));
+    const cv=document.createElement("canvas");cv.width=w;cv.height=h;
+    const k=cv.getContext("2d");k.drawImage(LOGO,0,0,w,h);
+    const d=k.getImageData(0,0,w,h).data;let x0=w,y0=h,x1=-1,y1=-1;
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4;
+      if(d[i+3]>24&&!(d[i]>238&&d[i+1]>238&&d[i+2]>238)){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}}
+    if(x1>x0&&y1>y0){const r=2;x0=Math.max(0,x0-r);y0=Math.max(0,y0-r);x1=Math.min(w-1,x1+r);y1=Math.min(h-1,y1+r);
+      logoAusschnitt={x:x0/f,y:y0/f,w:(x1-x0+1)/f,h:(y1-y0+1)/f};}
+  }catch(e){/* Bild nicht lesbar: ganzes Bild verwenden */}
+  return logoAusschnitt;
+}
+function headerBrand(c,W,H){const m=masse(W,H),S=m.S,ph=m.kopfH,pad=S*.009,x=W*.07,y=m.kopfY,a=logoBereich(),ih=ph-2*pad;
+  let iw=a.w&&a.h?ih*(a.w/a.h):ih,hh=ih;if(iw>S*.26){iw=S*.26;hh=iw*(a.h/a.w);}
+  const pw=iw+2*pad;c.save();c.shadowColor="rgba(0,0,0,.35)";c.shadowBlur=S*.015;c.shadowOffsetY=S*.004;c.fillStyle="#fff";rr(c,x,y,pw,ph,S*.018);c.fill();c.restore();
+  if(LOGO.complete&&LOGO.naturalWidth)c.drawImage(LOGO,a.x,a.y,a.w,a.h,Math.round(x+pad),Math.round(y+(ph-hh)/2),Math.round(iw),Math.round(hh));
+  return {tx:x+pw+S*.03,cy:y+ph/2};}
+function eyebrow(c,W,H,label,sub){const S=Math.min(W,H),b=headerBrand(c,W,H),tx=b.tx+S*.028,mw=W*.8-tx;c.fillStyle=akzent();rr(c,b.tx,b.cy-S*.03,S*.011,S*.06,3);c.fill();txt(c,label,tx,b.cy-S*.006,{size:S*.032,weight:900,spacing:2,upper:true,maxW:mw});txt(c,einpassen(c,sub||"",mw,S*.021,600,.8).text,tx,b.cy+S*.03,{size:S*.021,weight:600,color:GRAU,maxW:mw});}
+function mitSeite(sub,seite,n){return n>1?(sub?sub+" · ":"")+(seite+1)+"/"+n:sub;}
+
+/* Sponsorkasten: dunkel mit hellem Rand, Logo auf weißer Kachel, Text höchstens zwei Zeilen */
+function drawSponsors(c,W,H){const m=masse(W,H),S=m.S,x=m.x,y=m.sY,w=m.w,h=m.sH,pad=h*.11,sps=aktiverSponsor();
+  txt(c,T.praesentiert,W/2,m.sLabelY,{size:S*.019,weight:700,align:"center",color:GRAU,spacing:4,upper:true});
+  c.save();c.fillStyle="#161D26";rr(c,x,y,w,h,S*.018);c.fill();c.lineWidth=Math.max(2,S*.0022);c.strokeStyle="#4A5768";c.stroke();c.restore();
+  const hell="#F2F5F9",mittel="#B4BECB",gross=Math.max(S*.03,h*.3),klein=Math.max(S*.026,h*.25);
+  if(!sps.length){txt(c,"ONLANG",W/2,y+h/2,{size:h*.4,weight:900,align:"center",baseline:"middle",color:hell,spacing:3});return;}
+  const s=sps[0],img=logoImg(s.logo_url),ok=img&&img.complete&&img.naturalWidth&&!img.failed;
+  let tX=x+w*.04;
+  if(ok){const ar=img.naturalWidth/img.naturalHeight,kh=h-2*pad;let ih=kh-2*pad*.35,iw=ih*ar;const mx=w*.24;if(iw>mx){iw=mx;ih=iw/ar;}
+    const kw=iw+2*pad*.35,kx=x+pad;c.fillStyle="#fff";rr(c,kx,y+pad,kw,kh,S*.012);c.fill();
+    c.drawImage(img,Math.round(kx+(kw-iw)/2),Math.round(y+pad+(kh-ih)/2),Math.round(iw),Math.round(ih));tX=kx+kw+w*.035;}
+  const mw=x+w-tX-w*.035,roh=splitLines(s.banner_text);
+  /* Eigene Zeilenumbrüche im Text bleiben (höchstens zwei Zeilen), sonst wird nach Breite umgebrochen */
+  let zeilen;
+  if(roh.length>1)zeilen=[einpassen(c,roh[0],mw,klein*1.08,900,.93).text,einpassen(c,roh[1],mw,klein,600,1).text];
+  else if(breite(c,roh[0]||"",gross,900)<=mw)zeilen=[roh[0]||"ONLANG"];
+  else zeilen=zweiZeilen(c,roh[0],mw,klein,800);
+  const links=ok?"left":"center",px=ok?tX:W/2;
+  if(zeilen.length===1)txt(c,zeilen[0],px,y+h/2,{size:gross,weight:900,align:links,baseline:"middle",color:hell,maxW:mw});
+  else{txt(c,zeilen[0],px,y+h*.33,{size:roh.length>1?klein*1.08:klein,weight:roh.length>1?900:800,align:links,baseline:"middle",color:hell,maxW:mw});
+    txt(c,zeilen[1],px,y+h*.69,{size:klein,weight:roh.length>1?600:800,align:links,baseline:"middle",color:roh.length>1?mittel:hell,maxW:mw});}
+}
+function msgState(c,W,H,label,msg,sub){frame(c,W,H);eyebrow(c,W,H,label,saison());const m=masse(W,H),S=m.S,cy=(m.top+m.bot)/2;txt(c,msg,W/2,cy-S*.01,{size:S*.032,weight:800,align:"center",color:GRAU,maxW:W*.82});if(sub)txt(c,sub,W/2,cy+S*.045,{size:S*.022,weight:600,align:"center",color:"#5A6675",maxW:W*.82});}
+
+/* ===== Einzelergebnis: Heim oben, Spielstand groß in der Mitte, Gast unten =====
+   d: heim, gast, ph, pg, zeit (Zeile unter dem Spiel, z. B. Uhrzeit), ort, eigen ("heim"/"gast"/null), sieg (true/false/null) */
+function drawErgebnis(c,W,H,sub,d){frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);
+  const m=masse(W,H),S=m.S,cx=W/2,hoehe=m.bot-m.top,mw=W*.82;
+  const name=Math.min(S*.062,hoehe*.115),wort=d.sieg==null?0:S*.028,stand=Math.min(S*.2,hoehe*.36),zeit=d.zeit?S*.03:0,ort=d.ort?S*.024:0;
+  const hName=name*1.2,hWort=wort?wort*1.9:S*.012,hStand=stand*.98,hUnten=(zeit||ort)?S*.03+(zeit?zeit*1.35:0)+(ort?ort*1.35:0):0;
+  let y=m.top+(hoehe-(hName*2+hWort+hStand+hUnten))/2;
+  const farbeStand=d.sieg===false?GRAU_HELL:akzent();
+  const team=(text,eigen,yy)=>{const e=einpassen(c,String(text||"").toUpperCase(),mw,name,eigen?900:800,.6);
+    txt(c,e.text,cx,yy,{size:e.size,weight:eigen?900:800,align:"center",baseline:"middle",color:eigen?akzent():"#fff"});};
+  team(d.heim,d.eigen==="heim",y+hName/2);y+=hName;
+  if(wort)txt(c,d.sieg?T.sieg:T.niederlage,cx,y+hWort*.55,{size:wort,weight:900,align:"center",baseline:"middle",color:d.sieg?akzent():GRAU,spacing:5});
+  y+=hWort;
+  txt(c,`${d.ph} : ${d.pg}`,cx,y+hStand/2,{size:stand,weight:900,align:"center",baseline:"middle",color:farbeStand,maxW:mw});y+=hStand;
+  team(d.gast,d.eigen==="gast",y+hName/2);y+=hName+S*.03;
+  if(zeit){txt(c,d.zeit,cx,y+zeit*.6,{size:zeit,weight:800,align:"center",baseline:"middle",maxW:mw});y+=zeit*1.35;}
+  if(ort)txt(c,einpassen(c,d.ort,mw,ort,600,.85).text,cx,y+ort*.6,{size:ort,weight:600,align:"center",baseline:"middle",color:GRAU,maxW:mw});
+}
+
+/* ===== Listen (Ergebnisse, Termine) =====
+   Passen nicht alle Zeilen auf eine Grafik, werden sie gleichmäßig auf mehrere verteilt. */
+function listenPlan(W,H,anzahl){const m=masse(W,H),hoehe=m.bot-m.top,platz=Math.max(1,Math.floor(hoehe/(m.S*.1))),seiten=Math.max(1,Math.ceil(anzahl/platz));
+  return {m,hoehe,seiten,pro:Math.max(1,Math.ceil(anzahl/seiten))};}
+function listenSeiten(W,H,anzahl){return listenPlan(W,H,anzahl).seiten;}
+/* "HEIM – GAST" in einer Zeile. Gleiche Schriftgröße; nur ein zu langer Name wird verkleinert und notfalls gekürzt. */
+function namenZeile(c,r,x,y,platz,size){const trenner="  –  ",tb=breite(c,trenner,size,700),a=Math.max(platz-tb,10);
+  const H=String(r.heim||"").toUpperCase(),G=String(r.gast||"").toUpperCase(),gh=r.eigen==="heim"?900:700,gg=r.eigen==="gast"?900:700;
+  const bh=breite(c,H,size,gh),bg=breite(c,G,size,gg);let ph=a/2,pg=a/2;
+  if(bh<=ph)pg=a-bh;else if(bg<=pg)ph=a-bg;
+  const eh=einpassen(c,H,ph,size,gh,.66),eg=einpassen(c,G,pg,size,gg,.66);let px=x;
+  txt(c,eh.text,px,y,{size:eh.size,weight:gh,baseline:"middle",color:r.eigen==="heim"?akzent():"#fff"});px+=breite(c,eh.text,eh.size,gh);
+  txt(c,trenner,px,y,{size:size,weight:700,baseline:"middle",color:GRAU});px+=tb;
+  txt(c,eg.text,px,y,{size:eg.size,weight:gg,baseline:"middle",color:r.eigen==="gast"?akzent():"#fff"});}
+function nameEinzeln(c,text,eigen,x,y,platz,size){const g=eigen?900:700,e=einpassen(c,String(text||"").toUpperCase(),platz,size,g,.6);
+  txt(c,e.text,x,y,{size:e.size,weight:g,baseline:"middle",color:eigen?akzent():"#fff"});}
+function drawListe(c,W,H,title,sub,rows,mode,seite){
+  const plan=listenPlan(W,H,rows.length),m=plan.m,S=m.S,x=m.x,w=m.w;seite=Math.min(seite||0,plan.seiten-1);
+  frame(c,W,H);eyebrow(c,W,H,title,mitSeite(sub,seite,plan.seiten));
+  const teil=rows.slice(seite*plan.pro,(seite+1)*plan.pro),n=Math.max(teil.length,1);
+  /* Wenige Einträge: größere Zeilen, Block vertikal mittig */
+  const rh=Math.min(plan.hoehe/n,n<=3?S*.22:S*.19),gross=rh>=S*.15,y0=m.top+(plan.hoehe-n*rh)/2,luft=Math.min(rh*.12,S*.016);
+  const nameG=gross?Math.min(rh*.19,S*.044):Math.min(Math.max(rh*.25,S*.024),S*.034),zahlG=gross?Math.min(rh*.27,S*.06):Math.min(Math.max(rh*.3,S*.032),S*.046);
+  teil.forEach((r,i)=>{const y=y0+i*rh,bh=rh-luft,cy=y+bh/2;
+    c.fillStyle=i%2?"#161D26":"#1B232E";rr(c,x,y,w,bh,S*.012);c.fill();
+    /* Etikett der Mannschaft */
+    const ew=Math.min(w*.11,S*.16),eh=Math.min(bh*.5,S*.085),ex=x+w*.02;
+    c.fillStyle=akzent();rr(c,ex,cy-eh/2,ew,eh,S*.007);c.fill();
+    txt(c,r.label,ex+ew/2,cy,{size:Math.min(eh*.48,S*.03),weight:900,align:"center",baseline:"middle",color:aufAkzent(),maxW:ew*.88});
+    const tx=ex+ew+w*.03,rechts=x+w*.975;let links=rechts;
+    if(mode==="ergebnis"){
+      /* Abzeichen Sieg/Niederlage ganz rechts, Spielstand links daneben */
+      if(r.sieg!=null){const a=Math.min(bh*.42,gross?S*.062:S*.046),ax=rechts-a;
+        c.fillStyle=r.sieg?akzent():"#2A3340";rr(c,ax,cy-a/2,a,a,a*.22);c.fill();
+        txt(c,r.sieg?T.abzSieg:T.abzNiederlage,ax+a/2,cy+a*.03,{size:a*.5,weight:900,align:"center",baseline:"middle",color:r.sieg?aufAkzent():GRAU_HELL,maxW:a*.84});
+        links=ax-S*.022;}
+      txt(c,r.score,links,cy,{size:zahlG,weight:900,align:"right",baseline:"middle",color:r.sieg===false?GRAU_HELL:akzent()});
+      links-=breite(c,r.score,zahlG,900)+S*.03;
+      if(gross){nameEinzeln(c,r.heim,r.eigen==="heim",tx,y+bh*.33,links-tx,nameG);nameEinzeln(c,r.gast,r.eigen==="gast",tx,y+bh*.67,links-tx,nameG);}
+      else namenZeile(c,r,tx,cy,links-tx,nameG);
+    }else{
+      if(r.zeit){txt(c,r.zeit,rechts,cy,{size:zahlG,weight:900,align:"right",baseline:"middle",color:akzent()});links=rechts-breite(c,r.zeit,zahlG,900)-S*.03;}
+      const zweite=r.zweite||"",kleinG=gross?Math.min(rh*.105,S*.026):Math.min(Math.max(rh*.16,S*.017),S*.021);
+      if(gross){const a=zweite?[.26,.52,.80]:[.33,.67];
+        nameEinzeln(c,r.heim,r.eigen==="heim",tx,y+bh*a[0],links-tx,nameG);nameEinzeln(c,r.gast,r.eigen==="gast",tx,y+bh*a[1],links-tx,nameG);
+        if(zweite)txt(c,einpassen(c,zweite,links-tx,kleinG,600,.85).text,tx,y+bh*a[2],{size:kleinG,weight:600,baseline:"middle",color:GRAU,maxW:links-tx});}
+      else{namenZeile(c,r,tx,zweite?y+bh*.36:cy,links-tx,nameG);
+        if(zweite)txt(c,einpassen(c,zweite,links-tx,kleinG,600,.85).text,tx,y+bh*.72,{size:kleinG,weight:600,baseline:"middle",color:GRAU,maxW:links-tx});}
+    }});
+}
+/* ===== Tabelle (unverändert, nutzt nur den Platz bis zum Sponsorkasten) ===== */
+function drawTabelle(c,W,H,sub,rows){frame(c,W,H);eyebrow(c,W,H,T.tabelle,sub);const m=masse(W,H),S=m.S,x=m.x,w=m.w;rows=rows.slice(0,W/H>1.2?6:8);const top=m.top+S*.035,rh=(m.bot-top)/Math.max(rows.length,1),cP=x+w*.02,cT=x+w*.11,cSp=x+w*.70,cB=x+w*.82,cPk=x+w*.97,ky=top-S*.016;txt(c,"#",cP,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.team,cT,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.sp,cSp,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.sn,cB,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.pkt,cPk,ky,{size:S*.018,weight:800,align:"right",color:GRAU});rows.forEach((r,i)=>{const y=top+i*rh,mine=r.mine===true;c.fillStyle=mine?akzent():(i%2?"#161D26":"#1B232E");rr(c,x,y,w,rh*.84,9);c.fill();const mut=mine?aufAkzent():GRAU,fg=mine?aufAkzent():"#fff";txt(c,r.pos,cP,y+rh*.55,{size:S*.026,weight:900,color:fg});txt(c,r.team,cT,y+rh*.55,{size:S*.023,weight:mine?900:700,maxW:w*.54,upper:true,color:fg});txt(c,r.sp,cSp,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.s+"-"+r.n,cB,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.pkt,cPk,y+rh*.55,{size:S*.028,weight:900,align:"right",color:fg});});}
 
 /* ===== Steuerung ===== */
 const CV={post:cv_post,story:cv_story,banner:cv_banner};
-let state={type:null,weekIdx:0,teamIdx:0,gameIdx:0};
+let state={type:null,weekIdx:0,teamIdx:0,gameIdx:0,seite:0};
 let weeksMem=[],gamesMem=[],teamsMem=[],weekFrisch=true;
-function drawAll(fn){for(const k in CV){const cv=CV[k],c=cv.getContext("2d");c.clearRect(0,0,cv.width,cv.height);fn(c,cv.width,cv.height);}}
+/* Aktuelle Grafik: zeichne(c,W,H,seite) und seiten(W,H) = Anzahl der Grafiken in diesem Format */
+let grafik={zeichne:()=>{},seiten:()=>1};
+function seitenVon(k){return Math.max(1,grafik.seiten(CV[k].width,CV[k].height));}
+function zeichneAlle(){
+  let max=1;for(const k in CV)max=Math.max(max,seitenVon(k));
+  if(state.seite>=max)state.seite=0;
+  fillPageSelect(max);
+  for(const k in CV){const cv=CV[k],c=cv.getContext("2d");c.clearRect(0,0,cv.width,cv.height);grafik.zeichne(c,cv.width,cv.height,Math.min(state.seite,seitenVon(k)-1));}
+}
+function drawAll(zeichne,seiten){grafik={zeichne,seiten:seiten||(()=>1)};zeichneAlle();}
 function info(h){document.getElementById("ligainfo").innerHTML=h;}
-function fillTeamSelect(){team.innerHTML=teamsMem.length?teamsMem.map((t,i)=>`<option value="${i}">${esc(t.label)} · ${esc(t.liga)}</option>`).join(""):`<option>– keine –</option>`;if(state.teamIdx>=teamsMem.length)state.teamIdx=0;if(teamsMem.length)team.value=state.teamIdx;}
-function fillWeekSelect(weeks){week.innerHTML=weeks.length?weeks.map((w,i)=>`<option value="${i}">${w.label}</option>`).join(""):`<option>– keine –</option>`;if(state.weekIdx>=weeks.length)state.weekIdx=0;week.value=state.weekIdx;}
-function fillGameSelect(games){game.innerHTML=games.length?games.map((g,i)=>`<option value="${i}">${esc(g._label)} · ${esc(g._date)} · ${esc(g._heim)}–${esc(g._gast)} ${esc(g._score)}</option>`).join(""):`<option>– keine –</option>`;if(state.gameIdx>=games.length)state.gameIdx=0;game.value=state.gameIdx;}
-function readErg(){return{heim:heim.value,gast:gast.value,ph:+ph.value,pg:+pg.value,datum:datum.value,ort:ort.value};}
-function syncErgFromGame(g){if(!g)return;heim.value=g._heim||"";gast.value=g._gast||"";ph.value=g.punkte_heim??"";pg.value=g.punkte_gast??"";datum.value=(g._date||"")+(g._time?" · "+g._time+T.uhr:"");ort.value=g.halle||"";}
+function fillPageSelect(max){pageWrap.hidden=max<2;let h="";for(let i=0;i<max;i++)h+=`<option value="${i}">${i+1} / ${max}</option>`;page.innerHTML=h;page.value=String(state.seite);}
+function fillTeamSelect(){team.innerHTML=teamsMem.length?teamsMem.map((t,i)=>`<option value="${i}">${esc(t.label)} · ${esc(t.liga)}</option>`).join(""):`<option>${T.keine}</option>`;if(state.teamIdx>=teamsMem.length)state.teamIdx=0;if(teamsMem.length)team.value=state.teamIdx;}
+function fillWeekSelect(weeks){week.innerHTML=weeks.length?weeks.map((w,i)=>`<option value="${i}">${w.label}</option>`).join(""):`<option>${T.keine}</option>`;if(state.weekIdx>=weeks.length)state.weekIdx=0;week.value=state.weekIdx;}
+function fillGameSelect(games){game.innerHTML=games.length?games.map((g,i)=>`<option value="${i}">${esc(g._label)} · ${esc(g._date)} · ${esc(g._heim)}–${esc(g._gast)} ${esc(g._score)}</option>`).join(""):`<option>${T.keine}</option>`;if(state.gameIdx>=games.length)state.gameIdx=0;game.value=state.gameIdx;}
+/* Werte aus den Feldern; eigen kommt vom gewählten Spiel (im manuellen Modus unbekannt) */
+function readErg(eigen){const d={heim:heim.value,gast:gast.value,ph:+ph.value,pg:+pg.value,zeit:datum.value,ort:ort.value,eigen:eigen||null};d.sieg=siegVon(d.eigen,ph.value,pg.value);return d;}
+function syncErgFromGame(g){if(!g)return;heim.value=g._heim||"";gast.value=g._gast||"";ph.value=g.punkte_heim??"";pg.value=g.punkte_gast??"";datum.value=g._time?g._time+T.uhr:"";ort.value=g.halle||"";}
+/* Oben beim Einzelergebnis: Mannschaft · Liga · Datum */
+function ergebnisKopf(g){return [g._label,g.liga,g._date].filter(Boolean).join(" · ");}
 
 /* ===== Datenquelle: Automatik (Supabase) / Manuell (Notfall) ===== */
 let source="auto";
-const PH={
- ergebnisse:{title:"Titel (z. B. Ergebnisse der Woche)",rows:"Mannschaft; Heim; Gast; Ergebnis",ex:"U18; SG RW Gierath; TG Neuss; 78:65"},
- termine:{title:"Spielwoche / Titel",rows:"Mannschaft; Heim; Gast; Datum; Uhrzeit",ex:"U18; SG RW Gierath; TG Neuss; 04.10.2026; 15:00"},
- tabelle:{title:"Liga / Titel",rows:"Platz; Team; Spiele; Siege; Niederlagen; Punkte",ex:"1; SG RW Gierath; 5; 5; 0; 10"}
-};
 function cells(l){return l.split(/[;|\t]/).map(function(s){return s.trim();});}
 function manLines(){return manualRows.value.split(/\r?\n/).map(function(s){return s.trim();}).filter(Boolean);}
 function manErgebnisse(){return manLines().map(function(l){var c=cells(l);return{label:c[0]||"",heim:c[1]||"",gast:c[2]||"",score:c[3]||""};});}
-function manTermine(){return manLines().map(function(l){var c=cells(l);return{label:c[0]||"",heim:c[1]||"",gast:c[2]||"",datum:c[3]||"",zeit:c[4]||""};});}
+function manTermine(){return manLines().map(function(l){var c=cells(l);return{label:c[0]||"",heim:c[1]||"",gast:c[2]||"",datum:c[3]||"",zeit:c[4]||"",zweite:c[3]||""};});}
 function manTabelle(){return manLines().map(function(l){var c=cells(l);return{pos:c[0]||"",team:c[1]||"",sp:c[2]||"",s:c[3]||"",n:c[4]||"",pkt:c[5]||""};});}
-function manualPlaceholders(){var t=state.type||"ergebnis";if(t==="ergebnis")return;var p=PH[t];if(!p)return;manualTitleLbl.textContent=p.title;manualRows.placeholder=p.rows+"\n"+p.ex;manualHint.innerHTML="Eine Zeile pro Eintrag \u00b7 Felder mit <b>;</b> trennen.";}
+function manualPlaceholders(){var t=state.type||"ergebnis";if(t==="ergebnis")return;var p=T.manFelder[t];if(!p)return;manualTitleLbl.textContent=p.title;manualRows.placeholder=p.rows+"\n"+p.ex;manualHint.innerHTML=T.manHint;}
+function typTitel(t){return t==="tabelle"?T.tabelle:t==="termine"?T.termine:t==="ergebnisse"?T.ergebnisse:T.typErgebnis;}
+function zeigeListe(titel,sub,rows,mode){drawAll((c,W,H,seite)=>drawListe(c,W,H,titel,sub,rows,mode,seite),(W,H)=>listenSeiten(W,H,rows.length));}
 function renderManual(){
  var t=state.type||"ergebnis";var title=(manualTitle.value||"").trim();
- if(t==="ergebnis"){drawAll(function(c,W,H){drawErgebnis(c,W,H,title||"Manuell",readErg());});info("Manueller Modus \u00b7 Ergebnis");return;}
+ if(t==="ergebnis"){drawAll(function(c,W,H){drawErgebnis(c,W,H,title||T.manuellTitel,readErg(null));});info(T.manModus+" · "+T.typErgebnis);return;}
  var rows=t==="ergebnisse"?manErgebnisse():t==="termine"?manTermine():manTabelle();
- if(!rows.length){drawAll(function(c,W,H){msgState(c,W,H,t==="tabelle"?"Tabelle":t==="termine"?"Spieltermine":"Ergebnisse","Zeilen eingeben \u2026",PH[t]?PH[t].rows:"");});info("Manueller Modus \u00b7 noch keine Zeilen.");return;}
- if(t==="ergebnisse")drawAll(function(c,W,H){drawListe(c,W,H,T.ergebnisse,title||"Manuell",rows,"ergebnis");});
- else if(t==="termine")drawAll(function(c,W,H){drawListe(c,W,H,T.termine,title||"Manuell",rows,"termin");});
- else drawAll(function(c,W,H){drawTabelle(c,W,H,title||"Manuell",rows);});
- info("Manueller Modus \u00b7 "+rows.length+" Zeilen");
+ if(!rows.length){drawAll(function(c,W,H){msgState(c,W,H,typTitel(t),T.zeilenEingeben,T.manFelder[t]?T.manFelder[t].rows:"");});info(T.manModus+" · "+T.manKeineZeilen);return;}
+ if(t==="ergebnisse")zeigeListe(T.ergebnisse,title||T.manuellTitel,rows,"ergebnis");
+ else if(t==="termine")zeigeListe(T.termine,title||T.manuellTitel,rows,"termin");
+ else drawAll(function(c,W,H){drawTabelle(c,W,H,title||T.manuellTitel,rows);});
+ info(T.manModus+" · "+rows.length+" "+T.wortZeilen);
 }
 function applyVisibility(){
  var t=state.type,man=(source==="manuell");
@@ -257,91 +510,103 @@ function applyVisibility(){
 }
 
 async function render(){
-  if(startFehler){const sub=document.querySelector(".top .sub");if(sub)sub.textContent=startFehler;drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social",startFehler,"Adresse mit ?kunde=… aufrufen, z. B. ?kunde=V002"));info(esc(startFehler));return;}
-  if(!VEREIN){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social","Lädt Vereinsdaten …",""));return;}
+  if(startFehler){const meldung=startFehler(),sub=document.querySelector(".top .sub");if(sub)sub.textContent=meldung;drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social",meldung,T.adresseHinweis));info(esc(meldung));return;}
+  if(!VEREIN){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social",T.laedtVerein,""));return;}
   if(source==="manuell"){renderManual();return;}
   const type=state.type;
-  if(!type){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social","Wähle Ergebnis, Ergebnisse, Termine oder Tabelle.","Live-Daten werden erst bei Auswahl geladen."));return;}
-  drawAll((c,W,H)=>msgState(c,W,H,type==="ergebnis"?"Ergebnis":type==="ergebnisse"?"Ergebnisse":type==="termine"?"Spieltermine":"Tabelle","Lädt Live-Daten …",""));
+  if(!type){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social",T.waehle,T.waehleSub));return;}
+  drawAll((c,W,H)=>msgState(c,W,H,typTitel(type),T.laedt,""));
   try{
     if(type==="tabelle"){
       const alle=await ladeTabellen();
       teamsMem=tabellenTeams(alle);fillTeamSelect();
       const t=teamsMem[state.teamIdx];
-      if(!t){drawAll((c,W,H)=>msgState(c,W,H,"Tabelle","Noch keine Tabellendaten.",""));info("Keine Daten.");return;}
+      if(!t){drawAll((c,W,H)=>msgState(c,W,H,T.tabelle,T.keineTabelle,""));info(T.keineDaten);return;}
       const rows=alle.filter(r=>r.mannschaft_id===t.id).sort((a,b)=>a.rang-b.rang)
         .map(r=>({pos:r.rang,team:(r.eigenes_team&&kurz())?kurz():r.team,mine:r.eigenes_team===true,sp:r.spiele,s:r.siege,n:r.niederlagen,pkt:r.punkte}));
       drawAll((c,W,H)=>drawTabelle(c,W,H,t.label+" · "+t.liga,rows));
       const sp=await ladeAlleSpiele().catch(()=>[]);
-      info(`<b>${esc(t.label)}</b> · ${esc(t.liga)} · ${rows.length} Teams`+anbieterLinks(sp.filter(x=>x.mannschaft_id===t.id).map(x=>x.anbieter)));
+      info(`<b>${esc(t.label)}</b> · ${esc(t.liga)} · ${rows.length} ${T.wortTeams}`+anbieterLinks(sp.filter(x=>x.mannschaft_id===t.id).map(x=>x.anbieter)));
     } else if(type==="termine"||type==="ergebnisse"){
       const merged=await loadSpiele(type);
       weeksMem=buildWeeks(merged);
       if(weekFrisch){state.weekIdx=type==="ergebnisse"?Math.max(weeksMem.length-1,0):0;weekFrisch=false;}
       fillWeekSelect(weeksMem);
       const wk=weeksMem[state.weekIdx];
-      if(!wk){drawAll((c,W,H)=>msgState(c,W,H,type==="termine"?"Spieltermine":"Ergebnisse","Keine Spiele im Zeitraum.",""));info("Keine Daten.");return;}
+      if(!wk){drawAll((c,W,H)=>msgState(c,W,H,typTitel(type),type==="termine"?T.keineSpiele:T.keineErgebnisse,""));info(T.keineDaten);return;}
+      /* Termine: zweite Zeile ist die Halle; das Datum steht nur dabei, wenn die Spiele an verschiedenen Tagen sind */
+      const mehrereTage=new Set(wk.items.map(x=>x._date)).size>1;
       const rows=wk.items.map(x=> type==="termine"
-        ?{label:x._label,heim:x._heim,gast:x._gast,datum:x._date,zeit:x._time}
-        :{label:x._label,heim:x._heim,gast:x._gast,score:x._score});
-      drawAll((c,W,H)=>drawListe(c,W,H,type==="termine"?T.termine:T.ergebnisse,wk.label,rows,type==="termine"?"termin":"ergebnis"));
-      info(`<b>${esc(wk.label)}</b> · ${rows.length} Spiele · ${weeksMem.length} Wochen live`+anbieterLinks(wk.items.map(x=>x.anbieter)));
+        ?{label:x._label,heim:x._heim,gast:x._gast,eigen:x._eigen,zeit:x._time,zweite:[mehrereTage?x._date:"",x.halle||""].filter(Boolean).join(" · ")}
+        :{label:x._label,heim:x._heim,gast:x._gast,eigen:x._eigen,score:x._score,sieg:x._sieg});
+      zeigeListe(type==="termine"?T.termine:T.ergebnisse,wk.label,rows,type==="termine"?"termin":"ergebnis");
+      const grafiken=Math.max(...Object.keys(CV).map(seitenVon));
+      info(`<b>${esc(wk.label)}</b> · ${rows.length} ${T.wortSpiele} · ${weeksMem.length} ${T.wortWochen}`+(grafiken>1?` · ${grafiken} ${T.wortGrafiken}`:"")+anbieterLinks(wk.items.map(x=>x.anbieter)));
     } else if(type==="ergebnis"){
       const merged=(await loadSpiele("ergebnisse")).slice().reverse();gamesMem=merged;fillGameSelect(gamesMem);
       const g=gamesMem[state.gameIdx];
-      if(!g){drawAll((c,W,H)=>msgState(c,W,H,"Ergebnis","Keine Ergebnisse im Zeitraum.",""));info("Keine Daten.");return;}
+      if(!g){drawAll((c,W,H)=>msgState(c,W,H,T.typErgebnis,T.keineErgebnisse,""));info(T.keineDaten);return;}
       if(!heim.value||document.activeElement&&document.activeElement.id==="game")syncErgFromGame(g);
       if(!heim.value)syncErgFromGame(g);
-      drawAll((c,W,H)=>drawErgebnis(c,W,H,(g._label||"")+" · "+(g._date||""),readErg()));
-      info(`<b>${esc(g._label)}</b> · ${esc(g._date)} · Endstand ${esc(g._score)}`+anbieterLinks([g.anbieter]));
+      drawAll((c,W,H)=>drawErgebnis(c,W,H,ergebnisKopf(g),readErg(g._eigen)));
+      info(`<b>${esc(g._label)}</b> · ${esc(g._date)} · ${T.endstand} ${esc(g._score)}`+anbieterLinks([g.anbieter]));
     }
   }catch(e){
-    drawAll((c,W,H)=>msgState(c,W,H,"Fehler","Live-Daten nicht erreichbar.","Prüfe Verbindung. Details in der Konsole."));
-    info("Fehler beim Laden – Konsole prüfen.");console.error(e);
+    drawAll((c,W,H)=>msgState(c,W,H,T.fehler,T.nichtErreichbar,T.pruefe));
+    info(T.fehlerLaden);console.error(e);
   }
 }
-function setType(type){state.type=type;state.weekIdx=0;state.gameIdx=0;weekFrisch=true;
+function setType(type){state.type=type;state.weekIdx=0;state.gameIdx=0;state.seite=0;weekFrisch=true;
   document.querySelectorAll("#typeSeg button").forEach(b=>b.classList.toggle("active",b.dataset.type===type));
   heim.value="";applyVisibility();render();}
 document.querySelectorAll("#typeSeg button").forEach(b=>b.addEventListener("click",()=>setType(b.dataset.type)));
-document.querySelectorAll("#srcSeg button").forEach(b=>b.addEventListener("click",()=>{source=b.dataset.src;document.querySelectorAll("#srcSeg button").forEach(x=>x.classList.toggle("active",x.dataset.src===source));for(const k in cache)delete cache[k];if(!state.type){state.type="ergebnis";document.querySelectorAll("#typeSeg button").forEach(x=>x.classList.toggle("active",x.dataset.type==="ergebnis"));}applyVisibility();render();}));
+document.querySelectorAll("#srcSeg button").forEach(b=>b.addEventListener("click",()=>{source=b.dataset.src;document.querySelectorAll("#srcSeg button").forEach(x=>x.classList.toggle("active",x.dataset.src===source));for(const k in cache)delete cache[k];state.seite=0;if(!state.type){state.type="ergebnis";document.querySelectorAll("#typeSeg button").forEach(x=>x.classList.toggle("active",x.dataset.type==="ergebnis"));}applyVisibility();render();}));
 ["manualTitle","manualRows"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{if(source==="manuell")render();}));
 game.addEventListener("change",()=>{state.gameIdx=+game.value;syncErgFromGame(gamesMem[state.gameIdx]);render();});
-week.addEventListener("change",()=>{state.weekIdx=+week.value;render();});
+week.addEventListener("change",()=>{state.weekIdx=+week.value;state.seite=0;render();});
 team.addEventListener("change",()=>{state.teamIdx=+team.value;render();});
-["heim","gast","ph","pg","datum","ort"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{if(state.type!=="ergebnis")return;var sub;if(source==="manuell"){sub=(manualTitle.value||"Manuell");}else{var g=gamesMem[state.gameIdx]||{};sub=(g._label||"")+" · "+(g._date||"");}drawAll((c,W,H)=>drawErgebnis(c,W,H,sub,readErg()));}));
+page.addEventListener("change",()=>{state.seite=+page.value||0;zeichneAlle();});
+["heim","gast","ph","pg","datum","ort"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{if(state.type!=="ergebnis")return;if(source==="manuell"){drawAll((c,W,H)=>drawErgebnis(c,W,H,manualTitle.value||T.manuellTitel,readErg(null)));return;}var g=gamesMem[state.gameIdx]||{};drawAll((c,W,H)=>drawErgebnis(c,W,H,ergebnisKopf(g),readErg(g._eigen)));}));
 refresh.addEventListener("click",()=>{for(const k in cache)delete cache[k];render();});
-Object.values(CV).forEach(cv=>cv.addEventListener("click",()=>{let u;try{u=cv.toDataURL("image/png");}catch(e){alert("Export blockiert: Ein Logo liegt auf einer Adresse, die den Bild-Export nicht erlaubt (z. B. imgur).");return;}const w=window.open();if(w)w.document.write('<img src="'+u+'" style="max-width:100%">');}));
-download.addEventListener("click",()=>{const nm={post:"post_1x1",story:"story_9x16",banner:"banner_16x9"};const tag=state.type||"start";
-  try{for(const k in CV){CV[k].toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${dateiName()}_${tag}_${nm[k]}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);},"image/png");}}catch(e){alert("Download blockiert: Ein Logo erlaubt den Bild-Export nicht.");}});
+Object.values(CV).forEach(cv=>cv.addEventListener("click",()=>{let u;try{u=cv.toDataURL("image/png");}catch(e){alert(T.exportBlockiert);return;}const w=window.open();if(w)w.document.write('<img src="'+u+'" style="max-width:100%">');}));
+/* Herunterladen: je Format alle Grafiken (bei mehreren mit "_1von2", "_2von2" im Namen) */
+download.addEventListener("click",()=>{const nm={post:"post_1x1",story:"story_9x16",banner:"banner_16x9"};const tag=state.type||"start";let nr=0;
+  try{for(const k in CV){const n=seitenVon(k);for(let p=0;p<n;p++){
+    const cv=document.createElement("canvas");cv.width=CV[k].width;cv.height=CV[k].height;grafik.zeichne(cv.getContext("2d"),cv.width,cv.height,p);
+    const name=`${dateiName()}_${tag}_${nm[k]}${n>1?`_${p+1}von${n}`:""}.png`;
+    setTimeout(()=>{try{cv.toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);},"image/png");}catch(e){alert(T.downloadBlockiert);}},nr++*350);
+  }}}catch(e){alert(T.downloadBlockiert);}});
 sponsor.addEventListener("change",()=>{sponsorIdx=+sponsor.value||0;render();});
 
 /* ===== Start: Verein und Sponsoren laden, Spiele und Tabellen erst bei Auswahl ===== */
 function fillSponsorSelect(){
-  sponsor.innerHTML=SPONSOREN.length?SPONSOREN.map((s,i)=>`<option value="${i}">${esc(s.partner_name||("Sponsor "+(i+1)))}</option>`).join(""):`<option>– kein aktiver Sponsor –</option>`;
+  sponsor.innerHTML=SPONSOREN.length?SPONSOREN.map((s,i)=>`<option value="${i}">${esc(s.partner_name||(T.sponsor+" "+(i+1)))}</option>`).join(""):`<option>${T.keinSponsor}</option>`;
   if(SPONSOREN.length)sponsor.value=String(sponsorIdx);
 }
 function zeigeVerein(){
   const name=kurz(),h1=document.querySelector(".top h1"),s=document.querySelector(".top .sub"),lg=document.querySelector(".top img.logo");
+  AKZENT=waehleAkzent(VEREIN);
+  setzeSprache(VEREIN.sprache);
   if(h1)h1.textContent="ONLANG Social · "+name;
   if(s)s.textContent=VEREIN.kunden_id+" · "+(VEREIN.verein_name||"");
   document.title="ONLANG Social · "+name+" "+VEREIN.kunden_id;
-  if(VEREIN.thema_farbe)document.documentElement.style.setProperty("--red",VEREIN.thema_farbe);
+  /* Bedienoberfläche in der Akzentfarbe, damit Knöpfe auch bei dunkler Vereinsfarbe sichtbar sind */
+  document.documentElement.style.setProperty("--red",AKZENT);
+  document.documentElement.style.setProperty("--onred",aufAkzent());
   if(VEREIN.logo_verein){LOGO.src=VEREIN.logo_verein;if(lg){lg.src=VEREIN.logo_verein;lg.alt=name;lg.hidden=false;}}
-  AKZENT=waehleAkzent(VEREIN);
-  T=TEXTE[String(VEREIN.sprache||"").trim().toLowerCase()]||TEXTE.de;
 }
 async function start(){
+  texteAnwenden();
   applyVisibility();
-  if(!KUNDE){startFehler="Kein Verein angegeben.";render();return;}
+  if(!KUNDE){startFehler=()=>T.keinVerein;render();return;}
   render();
   try{
     const v=await ladeVerein();
-    if(!v){startFehler="Verein "+KUNDE+" nicht gefunden.";render();return;}
+    if(!v){startFehler=()=>T.vereinNichtGefunden(KUNDE);render();return;}
     VEREIN=v;zeigeVerein();
     SPONSOREN=await ladeSponsoren().catch(e=>{console.error(e);return [];});
     fillSponsorSelect();
-  }catch(e){startFehler="Vereinsdaten nicht erreichbar.";console.error(e);}
+  }catch(e){startFehler=()=>T.vereinNichtErreichbar;console.error(e);}
   render();
 }
 start();  /* Start: nur Verein und Sponsoren, Spiele und Tabellen erst bei Auswahl */
