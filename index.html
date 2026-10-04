@@ -119,7 +119,7 @@ const TEXTE={
   /* Grafiken */
   saison:"Saison",endstand:"Endstand",praesentiert:"Präsentiert von",ergebnisse:"Ergebnisse",termine:"Spieltermine",tabelle:"Tabelle",
   team:"TEAM",sp:"SP",sn:"S-N",pkt:"PKT",uhr:" Uhr",datum:(j,m,t)=>t+"."+m+"."+j,
-  sieg:"SIEG",niederlage:"NIEDERLAGE",abzSieg:"S",abzNiederlage:"N",
+  sieg:"SIEG",niederlage:"NIEDERLAGE",abzSieg:"S",abzNiederlage:"N",platzBereich:(a,b)=>"Platz "+a+"–"+b,
   /* Oberfläche */
   laedtVerein:"Lädt Vereinsdaten …",
   hinweis:"<b>Live aus Supabase.</b> Spiele und Tabellen werden erst beim Wechsel auf Ergebnis / Ergebnisse / Termine / Tabelle geladen – nicht beim Start. Fällt die Verbindung aus, oben auf <b>Manuell</b> umschalten und Daten von Hand eingeben.",
@@ -150,7 +150,7 @@ const TEXTE={
  hu:{
   saison:"Szezon",endstand:"Végeredmény",praesentiert:"Támogatónk",ergebnisse:"Eredmények",termine:"Mérkőzések",tabelle:"Tabella",
   team:"CSAPAT",sp:"M",sn:"GY-V",pkt:"PT",uhr:"",datum:(j,m,t)=>j+"."+m+"."+t+".",
-  sieg:"GYŐZELEM",niederlage:"VERESÉG",abzSieg:"GY",abzNiederlage:"V",
+  sieg:"GYŐZELEM",niederlage:"VERESÉG",abzSieg:"GY",abzNiederlage:"V",platzBereich:(a,b)=>a+"–"+b+". hely",
   laedtVerein:"Egyesületi adatok betöltése …",
   hinweis:"<b>Élő adatok a Supabase-ből.</b> A mérkőzések és a tabellák csak akkor töltődnek be, amikor az Eredmény / Eredmények / Mérkőzések / Tabella típusra váltasz – induláskor nem. Ha nincs kapcsolat, válts fent <b>Kézi</b> módra, és add meg az adatokat kézzel.",
   einstellungen:"Beállítások",datenquelle:"Adatforrás",automatik:"Automatikus (Supabase)",manuell:"Kézi",grafikTyp:"Grafika típusa",
@@ -180,7 +180,7 @@ const TEXTE={
  en:{
   saison:"Season",endstand:"Final score",praesentiert:"Presented by",ergebnisse:"Results",termine:"Fixtures",tabelle:"Standings",
   team:"TEAM",sp:"GP",sn:"W-L",pkt:"PTS",uhr:"",datum:(j,m,t)=>t+"/"+m+"/"+j,
-  sieg:"WIN",niederlage:"LOSS",abzSieg:"W",abzNiederlage:"L",
+  sieg:"WIN",niederlage:"LOSS",abzSieg:"W",abzNiederlage:"L",platzBereich:(a,b)=>"Places "+a+"–"+b,
   laedtVerein:"Loading club data …",
   hinweis:"<b>Live from Supabase.</b> Games and standings are only loaded when you switch to Result / Results / Fixtures / Standings – not at start. If the connection fails, switch to <b>Manual</b> above and enter the data by hand.",
   einstellungen:"Settings",datenquelle:"Data source",automatik:"Automatic (Supabase)",manuell:"Manual",grafikTyp:"Graphic type",
@@ -405,53 +405,71 @@ function drawErgebnis(c,W,H,sub,d){frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);
 function listenPlan(W,H,anzahl){const m=masse(W,H),hoehe=m.bot-m.top,platz=Math.max(1,Math.floor(hoehe/(m.S*.1))),seiten=Math.max(1,Math.ceil(anzahl/platz));
   return {m,hoehe,seiten,pro:Math.max(1,Math.ceil(anzahl/seiten))};}
 function listenSeiten(W,H,anzahl){return listenPlan(W,H,anzahl).seiten;}
-/* "HEIM – GAST" in einer Zeile. Gleiche Schriftgröße; nur ein zu langer Name wird verkleinert und notfalls gekürzt. */
-function namenZeile(c,r,x,y,platz,size){const trenner="  –  ",tb=breite(c,trenner,size,700),a=Math.max(platz-tb,10);
-  const H=String(r.heim||"").toUpperCase(),G=String(r.gast||"").toUpperCase(),gh=r.eigen==="heim"?900:700,gg=r.eigen==="gast"?900:700;
-  const bh=breite(c,H,size,gh),bg=breite(c,G,size,gg);let ph=a/2,pg=a/2;
-  if(bh<=ph)pg=a-bh;else if(bg<=pg)ph=a-bg;
-  const eh=einpassen(c,H,ph,size,gh,.66),eg=einpassen(c,G,pg,size,gg,.66);let px=x;
-  txt(c,eh.text,px,y,{size:eh.size,weight:gh,baseline:"middle",color:r.eigen==="heim"?akzent():"#fff"});px+=breite(c,eh.text,eh.size,gh);
-  txt(c,trenner,px,y,{size:size,weight:700,baseline:"middle",color:GRAU});px+=tb;
-  txt(c,eg.text,px,y,{size:eg.size,weight:gg,baseline:"middle",color:r.eigen==="gast"?akzent():"#fff"});}
-function nameEinzeln(c,text,eigen,x,y,platz,size){const g=eigen?900:700,e=einpassen(c,String(text||"").toUpperCase(),platz,size,g,.6);
-  txt(c,e.text,x,y,{size:e.size,weight:g,baseline:"middle",color:eigen?akzent():"#fff"});}
+/* Kleinste Schriftgröße zwischen size und size*minFaktor, bei der passt(größe) stimmt */
+function noetigeGroesse(passt,size,minFaktor){let k=Math.round(size);const min=Math.round(size*minFaktor);while(k>min&&!passt(k))k--;return k;}
+const TRENNER="  –  ";
+function namenMasse(c,r,size){const H=String(r.heim||"").toUpperCase(),G=String(r.gast||"").toUpperCase(),gh=r.eigen==="heim"?900:700,gg=r.eigen==="gast"?900:700;
+  return {H,G,gh,gg,bh:breite(c,H,size,gh),bg:breite(c,G,size,gg),tb:breite(c,TRENNER,size,700)};}
+/* "HEIM – GAST" in einer Zeile, beide Namen in derselben Größe. Was nicht passt, wird mit "…" gekürzt. */
+function namenZeile(c,r,x,y,platz,size){const n=namenMasse(c,r,size),a=Math.max(platz-n.tb,10);let ph=a/2,pg=a/2;
+  if(n.bh<=ph)pg=a-n.bh;else if(n.bg<=pg)ph=a-n.bg;
+  const eh=einpassen(c,n.H,ph,size,n.gh,1),eg=einpassen(c,n.G,pg,size,n.gg,1);let px=x;
+  txt(c,eh.text,px,y,{size:size,weight:n.gh,baseline:"middle",color:r.eigen==="heim"?akzent():"#fff"});px+=breite(c,eh.text,size,n.gh);
+  txt(c,TRENNER,px,y,{size:size,weight:700,baseline:"middle",color:GRAU});px+=n.tb;
+  txt(c,eg.text,px,y,{size:size,weight:n.gg,baseline:"middle",color:r.eigen==="gast"?akzent():"#fff"});}
+function nameEinzeln(c,text,eigen,x,y,platz,size){const g=eigen?900:700,e=einpassen(c,String(text||"").toUpperCase(),platz,size,g,1);
+  txt(c,e.text,x,y,{size:size,weight:g,baseline:"middle",color:eigen?akzent():"#fff"});}
 function drawListe(c,W,H,title,sub,rows,mode,seite){
   const plan=listenPlan(W,H,rows.length),m=plan.m,S=m.S,x=m.x,w=m.w;seite=Math.min(seite||0,plan.seiten-1);
   frame(c,W,H);eyebrow(c,W,H,title,mitSeite(sub,seite,plan.seiten));
   const teil=rows.slice(seite*plan.pro,(seite+1)*plan.pro),n=Math.max(teil.length,1);
   /* Wenige Einträge: größere Zeilen, Block vertikal mittig */
-  const rh=Math.min(plan.hoehe/n,n<=3?S*.22:S*.19),gross=rh>=S*.15,y0=m.top+(plan.hoehe-n*rh)/2,luft=Math.min(rh*.12,S*.016);
-  const nameG=gross?Math.min(rh*.19,S*.044):Math.min(Math.max(rh*.25,S*.024),S*.034),zahlG=gross?Math.min(rh*.27,S*.06):Math.min(Math.max(rh*.3,S*.032),S*.046);
-  teil.forEach((r,i)=>{const y=y0+i*rh,bh=rh-luft,cy=y+bh/2;
+  const rh=Math.min(plan.hoehe/n,n<=3?S*.22:S*.19),gross=rh>=S*.15,y0=m.top+(plan.hoehe-n*rh)/2,luft=Math.min(rh*.12,S*.016),bh=rh-luft;
+  const nameBasis=gross?Math.min(rh*.19,S*.044):Math.min(Math.max(rh*.25,S*.024),S*.034),zahlG=gross?Math.min(rh*.27,S*.06):Math.min(Math.max(rh*.3,S*.032),S*.046);
+  const ew=Math.min(w*.11,S*.16),eh=Math.min(bh*.5,S*.085),ex=x+w*.02,tx=ex+ew+w*.03,rechts=x+w*.975;
+  const abz=Math.min(bh*.42,gross?S*.062:S*.046);
+  /* Platz für die Teamnamen je Zeile: bis zum Spielstand bzw. zur Uhrzeit */
+  const platz=teil.map(r=>{let links=rechts;
+    if(mode==="ergebnis"){if(r.sieg!=null)links=rechts-abz-S*.022;links-=breite(c,r.score,zahlG,900)+S*.03;}
+    else if(r.zeit)links=rechts-breite(c,r.zeit,zahlG,900)-S*.03;
+    return links-tx;});
+  /* EINE Schriftgröße für alle Teamnamen der Grafik: die kleinste, die eine Zeile braucht (nicht unter der Mindestgröße) */
+  const nameG=Math.min(nameBasis,...teil.map((r,i)=>noetigeGroesse(k=>{const a=namenMasse(c,r,k);
+    return gross?(a.bh<=platz[i]&&a.bg<=platz[i]):(a.bh+a.bg+a.tb<=platz[i]);},nameBasis,gross?.6:.66)));
+  /* EINE Schriftgröße für alle Etiketten der Grafik: nach dem längsten Etikett */
+  let etikettG=Math.round(Math.min(eh*.48,S*.03));
+  while(etikettG>10&&teil.some(r=>breite(c,r.label,etikettG,900)>ew*.88))etikettG--;
+  teil.forEach((r,i)=>{const y=y0+i*rh,cy=y+bh/2,p=platz[i];
     c.fillStyle=i%2?"#161D26":"#1B232E";rr(c,x,y,w,bh,S*.012);c.fill();
-    /* Etikett der Mannschaft */
-    const ew=Math.min(w*.11,S*.16),eh=Math.min(bh*.5,S*.085),ex=x+w*.02;
     c.fillStyle=akzent();rr(c,ex,cy-eh/2,ew,eh,S*.007);c.fill();
-    txt(c,r.label,ex+ew/2,cy,{size:Math.min(eh*.48,S*.03),weight:900,align:"center",baseline:"middle",color:aufAkzent(),maxW:ew*.88});
-    const tx=ex+ew+w*.03,rechts=x+w*.975;let links=rechts;
+    txt(c,einpassen(c,r.label,ew*.88,etikettG,900,1).text,ex+ew/2,cy,{size:etikettG,weight:900,align:"center",baseline:"middle",color:aufAkzent()});
     if(mode==="ergebnis"){
       /* Abzeichen Sieg/Niederlage ganz rechts, Spielstand links daneben */
-      if(r.sieg!=null){const a=Math.min(bh*.42,gross?S*.062:S*.046),ax=rechts-a;
-        c.fillStyle=r.sieg?akzent():"#2A3340";rr(c,ax,cy-a/2,a,a,a*.22);c.fill();
-        txt(c,r.sieg?T.abzSieg:T.abzNiederlage,ax+a/2,cy+a*.03,{size:a*.5,weight:900,align:"center",baseline:"middle",color:r.sieg?aufAkzent():GRAU_HELL,maxW:a*.84});
+      let links=rechts;
+      if(r.sieg!=null){const ax=rechts-abz;
+        c.fillStyle=r.sieg?akzent():"#2A3340";rr(c,ax,cy-abz/2,abz,abz,abz*.22);c.fill();
+        txt(c,r.sieg?T.abzSieg:T.abzNiederlage,ax+abz/2,cy+abz*.03,{size:abz*.5,weight:900,align:"center",baseline:"middle",color:r.sieg?aufAkzent():GRAU_HELL,maxW:abz*.84});
         links=ax-S*.022;}
       txt(c,r.score,links,cy,{size:zahlG,weight:900,align:"right",baseline:"middle",color:r.sieg===false?GRAU_HELL:akzent()});
-      links-=breite(c,r.score,zahlG,900)+S*.03;
-      if(gross){nameEinzeln(c,r.heim,r.eigen==="heim",tx,y+bh*.33,links-tx,nameG);nameEinzeln(c,r.gast,r.eigen==="gast",tx,y+bh*.67,links-tx,nameG);}
-      else namenZeile(c,r,tx,cy,links-tx,nameG);
+      if(gross){nameEinzeln(c,r.heim,r.eigen==="heim",tx,y+bh*.33,p,nameG);nameEinzeln(c,r.gast,r.eigen==="gast",tx,y+bh*.67,p,nameG);}
+      else namenZeile(c,r,tx,cy,p,nameG);
     }else{
-      if(r.zeit){txt(c,r.zeit,rechts,cy,{size:zahlG,weight:900,align:"right",baseline:"middle",color:akzent()});links=rechts-breite(c,r.zeit,zahlG,900)-S*.03;}
+      if(r.zeit)txt(c,r.zeit,rechts,cy,{size:zahlG,weight:900,align:"right",baseline:"middle",color:akzent()});
       const zweite=r.zweite||"",kleinG=gross?Math.min(rh*.105,S*.026):Math.min(Math.max(rh*.16,S*.017),S*.021);
       if(gross){const a=zweite?[.26,.52,.80]:[.33,.67];
-        nameEinzeln(c,r.heim,r.eigen==="heim",tx,y+bh*a[0],links-tx,nameG);nameEinzeln(c,r.gast,r.eigen==="gast",tx,y+bh*a[1],links-tx,nameG);
-        if(zweite)txt(c,einpassen(c,zweite,links-tx,kleinG,600,.85).text,tx,y+bh*a[2],{size:kleinG,weight:600,baseline:"middle",color:GRAU,maxW:links-tx});}
-      else{namenZeile(c,r,tx,zweite?y+bh*.36:cy,links-tx,nameG);
-        if(zweite)txt(c,einpassen(c,zweite,links-tx,kleinG,600,.85).text,tx,y+bh*.72,{size:kleinG,weight:600,baseline:"middle",color:GRAU,maxW:links-tx});}
+        nameEinzeln(c,r.heim,r.eigen==="heim",tx,y+bh*a[0],p,nameG);nameEinzeln(c,r.gast,r.eigen==="gast",tx,y+bh*a[1],p,nameG);
+        if(zweite)txt(c,einpassen(c,zweite,p,kleinG,600,1).text,tx,y+bh*a[2],{size:kleinG,weight:600,baseline:"middle",color:GRAU});}
+      else{namenZeile(c,r,tx,zweite?y+bh*.36:cy,p,nameG);
+        if(zweite)txt(c,einpassen(c,zweite,p,kleinG,600,1).text,tx,y+bh*.72,{size:kleinG,weight:600,baseline:"middle",color:GRAU});}
     }});
 }
-/* ===== Tabelle (unverändert, nutzt nur den Platz bis zum Sponsorkasten) ===== */
-function drawTabelle(c,W,H,sub,rows){frame(c,W,H);eyebrow(c,W,H,T.tabelle,sub);const m=masse(W,H),S=m.S,x=m.x,w=m.w;rows=rows.slice(0,W/H>1.2?6:8);const top=m.top+S*.035,rh=(m.bot-top)/Math.max(rows.length,1),cP=x+w*.02,cT=x+w*.11,cSp=x+w*.70,cB=x+w*.82,cPk=x+w*.97,ky=top-S*.016;txt(c,"#",cP,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.team,cT,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.sp,cSp,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.sn,cB,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.pkt,cPk,ky,{size:S*.018,weight:800,align:"right",color:GRAU});rows.forEach((r,i)=>{const y=top+i*rh,mine=r.mine===true;c.fillStyle=mine?akzent():(i%2?"#161D26":"#1B232E");rr(c,x,y,w,rh*.84,9);c.fill();const mut=mine?aufAkzent():GRAU,fg=mine?aufAkzent():"#fff";txt(c,r.pos,cP,y+rh*.55,{size:S*.026,weight:900,color:fg});txt(c,r.team,cT,y+rh*.55,{size:S*.023,weight:mine?900:700,maxW:w*.54,upper:true,color:fg});txt(c,r.sp,cSp,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.s+"-"+r.n,cB,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.pkt,cPk,y+rh*.55,{size:S*.028,weight:900,align:"right",color:fg});});}
+/* ===== Tabelle =====
+   Hat die Liga mehr Teams als Zeilen, wird ein Ausschnitt gezeigt, in dem die eigene Mannschaft
+   sichtbar ist: von oben, solange sie dort hineinpasst, sonst möglichst mittig. Der Untertitel nennt die Plätze. */
+function tabellenAusschnitt(rows,max){if(rows.length<=max)return {rows,bereich:""};
+  const i=rows.findIndex(r=>r.mine===true),von=i<max?0:Math.min(Math.max(i-Math.floor(max/2),0),rows.length-max),teil=rows.slice(von,von+max);
+  return {rows:teil,bereich:T.platzBereich(teil[0].pos,teil[teil.length-1].pos)};}
+function drawTabelle(c,W,H,sub,rows){const ausschnitt=tabellenAusschnitt(rows,W/H>1.2?6:8);if(ausschnitt.bereich)sub=(sub?sub+" · ":"")+ausschnitt.bereich;frame(c,W,H);eyebrow(c,W,H,T.tabelle,sub);const m=masse(W,H),S=m.S,x=m.x,w=m.w;rows=ausschnitt.rows;const top=m.top+S*.035,rh=(m.bot-top)/Math.max(rows.length,1),cP=x+w*.02,cT=x+w*.11,cSp=x+w*.70,cB=x+w*.82,cPk=x+w*.97,ky=top-S*.016;txt(c,"#",cP,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.team,cT,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.sp,cSp,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.sn,cB,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.pkt,cPk,ky,{size:S*.018,weight:800,align:"right",color:GRAU});rows.forEach((r,i)=>{const y=top+i*rh,mine=r.mine===true;c.fillStyle=mine?akzent():(i%2?"#161D26":"#1B232E");rr(c,x,y,w,rh*.84,9);c.fill();const mut=mine?aufAkzent():GRAU,fg=mine?aufAkzent():"#fff";txt(c,r.pos,cP,y+rh*.55,{size:S*.026,weight:900,color:fg});txt(c,r.team,cT,y+rh*.55,{size:S*.023,weight:mine?900:700,maxW:w*.54,upper:true,color:fg});txt(c,r.sp,cSp,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.s+"-"+r.n,cB,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.pkt,cPk,y+rh*.55,{size:S*.028,weight:900,align:"right",color:fg});});}
 
 /* ===== Steuerung ===== */
 const CV={post:cv_post,story:cv_story,banner:cv_banner};
