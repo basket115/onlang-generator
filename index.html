@@ -102,7 +102,7 @@
 /* ===== Supabase (nur lesen, öffentlicher Schlüssel) ===== */
 const SUPABASE_URL="https://ccwlglszhwvbhzhdtxtl.supabase.co";
 /* Hier NUR den öffentlichen publishable Key eintragen (sb_publishable_…), NIEMALS einen geheimen Schlüssel. */
-const SUPABASE_KEY="";
+const SUPABASE_KEY="sb_publishable_hFwqCDf1pMIYkXMq7a0jyQ_XcweL-mS";
 
 /* ===== Verein per URL ?kunde=ID – kein Standard, kein Rückfall ===== */
 const KUNDE=(new URLSearchParams(location.search).get("kunde")||"").trim().toUpperCase();
@@ -113,9 +113,9 @@ let startFehler="";   /* gesetzt, wenn der Verein nicht geladen werden konnte */
 
 /* ===== Texte in den Grafiken nach kunden.sprache (unbekannt → de) ===== */
 const TEXTE={
- de:{endstand:"Endstand",praesentiert:"Präsentiert von",ergebnisse:"Ergebnisse",termine:"Spieltermine",tabelle:"Tabelle",team:"TEAM",sp:"SP",sn:"S-N",pkt:"PKT",uhr:" Uhr",datum:(j,m,t)=>t+"."+m+"."+j},
- hu:{endstand:"Végeredmény",praesentiert:"Támogatónk",ergebnisse:"Eredmények",termine:"Mérkőzések",tabelle:"Tabella",team:"CSAPAT",sp:"M",sn:"GY-V",pkt:"PT",uhr:"",datum:(j,m,t)=>j+"."+m+"."+t+"."},
- en:{endstand:"Final score",praesentiert:"Presented by",ergebnisse:"Results",termine:"Fixtures",tabelle:"Standings",team:"TEAM",sp:"GP",sn:"W-L",pkt:"PTS",uhr:"",datum:(j,m,t)=>t+"/"+m+"/"+j}
+ de:{saison:"Saison",endstand:"Endstand",praesentiert:"Präsentiert von",ergebnisse:"Ergebnisse",termine:"Spieltermine",tabelle:"Tabelle",team:"TEAM",sp:"SP",sn:"S-N",pkt:"PKT",uhr:" Uhr",datum:(j,m,t)=>t+"."+m+"."+j},
+ hu:{saison:"Szezon",endstand:"Végeredmény",praesentiert:"Támogatónk",ergebnisse:"Eredmények",termine:"Mérkőzések",tabelle:"Tabella",team:"CSAPAT",sp:"M",sn:"GY-V",pkt:"PT",uhr:"",datum:(j,m,t)=>j+"."+m+"."+t+"."},
+ en:{saison:"Season",endstand:"Final score",praesentiert:"Presented by",ergebnisse:"Results",termine:"Fixtures",tabelle:"Standings",team:"TEAM",sp:"GP",sn:"W-L",pkt:"PTS",uhr:"",datum:(j,m,t)=>t+"/"+m+"/"+j}
 };
 let T=TEXTE.de;
 
@@ -123,6 +123,13 @@ const LOGO=new Image(); LOGO.crossOrigin="anonymous"; LOGO.onload=()=>render();
 function aktiverSponsor(){const s=SPONSOREN[sponsorIdx];return s?[s]:[];}
 const _lc={};function logoImg(u){if(!u)return null;if(!_lc[u]){const im=new Image();im.crossOrigin="anonymous";im.onload=()=>render();im.onerror=()=>{im.failed=true;render();};im.src=u;_lc[u]=im;}return _lc[u];}
 function kurz(){return (VEREIN&&(VEREIN.short_name||VEREIN.verein_name))||"";}
+/* Saison aus dem heutigen Datum: ab Juli beginnt die neue Saison */
+function saison(){const d=new Date(),j=d.getFullYear(),s=d.getMonth()>=6?j:j-1;return T.saison+" "+s+"/"+String(s+1).slice(2);}
+/* Dateiname der PNGs: Kurzname des Vereins, sonst die Kunden-ID */
+function dateiName(){const s=String((VEREIN&&VEREIN.short_name)||KUNDE||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");return s||KUNDE.toLowerCase()||"onlang";}
+/* Info-Link je Anbieter der Spieldaten */
+const ANBIETER={bbn:["basketball-bund.net","https://www.basketball-bund.net/"],mkosz:["mkosz.hu","https://mkosz.hu/"]};
+function anbieterLinks(liste){return Array.from(new Set(liste)).filter(a=>ANBIETER[a]).map(a=>`<br><a href="${ANBIETER[a][1]}" target="_blank" rel="noopener">${ANBIETER[a][0]} ↗</a>`).join("");}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));}
 
 /* ---- fetch + cache: ein Abruf je Quelle für den ganzen Verein ---- */
@@ -185,7 +192,7 @@ function frame(c,W,H){const R=css("--red"),S=Math.min(W,H);c.fillStyle="#0B0E13"
 function headerBrand(c,W,H){const S=Math.min(W,H),ph=S*.12,pad=S*.016,x=W*.07,y=H*.055,lw=(LOGO.naturalWidth||116),lh=(LOGO.naturalHeight||114),ih=ph-2*pad,iw=ih*(lw/lh),pw=iw+2*pad;c.save();c.shadowColor="rgba(0,0,0,.35)";c.shadowBlur=S*.015;c.shadowOffsetY=S*.004;c.fillStyle="#fff";rr(c,x,y,pw,ph,S*.018);c.fill();c.restore();if(LOGO.complete&&LOGO.naturalWidth)c.drawImage(LOGO,Math.round(x+pad),Math.round(y+pad),Math.round(iw),Math.round(ih));return {tx:x+pw+S*.03,cy:y+ph/2};}
 function eyebrow(c,W,H,label,sub){const S=Math.min(W,H),b=headerBrand(c,W,H);c.fillStyle=css("--red");rr(c,b.tx,b.cy-S*.03,S*.011,S*.06,3);c.fill();txt(c,label,b.tx+S*.028,b.cy-S*.006,{size:S*.032,weight:900,spacing:2,upper:true});txt(c,sub,b.tx+S*.028,b.cy+S*.03,{size:S*.021,weight:600,color:"#8A97A6"});}
 function drawSponsors(c,W,H){const S=Math.min(W,H),sps=aktiverSponsor();txt(c,T.praesentiert,W/2,H*.767,{size:S*.02,weight:700,align:"center",color:"#8A97A6",spacing:4,upper:true});const x=W*.09,y=H*.795,w=W*.82,h=H*.13,pad=h*.13;c.save();c.shadowColor="rgba(0,0,0,.3)";c.shadowBlur=S*.015;c.shadowOffsetY=S*.004;c.fillStyle="#fff";rr(c,x,y,w,h,S*.018);c.fill();c.restore();if(!sps.length){txt(c,"ONLANG",W/2,y+h*.62,{size:h*.42,weight:900,align:"center",color:"#0B0E13",spacing:3});return;}const s=sps[0],img=logoImg(s.logo_url),ls=splitLines(s.banner_text),ok=img&&img.complete&&img.naturalWidth&&!img.failed;if(ok){const ar=img.naturalWidth/img.naturalHeight;let ih=h-2*pad,iw=ih*ar,mx=w*.26;if(iw>mx){iw=mx;ih=iw/ar;}const lx=x+w*.045,ly=y+(h-ih)/2;c.drawImage(img,Math.round(lx),Math.round(ly),Math.round(iw),Math.round(ih));const tX=lx+iw+w*.05,mw=x+w-tX-w*.045;if(ls.length>1){txt(c,ls[0],tX,y+h*.42,{size:h*.27,weight:900,color:"#0B0E13",maxW:mw});txt(c,ls[1],tX,y+h*.73,{size:h*.21,weight:600,color:"#2A3138",maxW:mw});}else txt(c,ls[0]||"",tX,y+h*.6,{size:h*.32,weight:900,color:"#0B0E13",maxW:mw});}else{txt(c,ls[0]||"ONLANG",W/2,y+(ls[1]?h*.42:h*.6),{size:h*.28,weight:900,align:"center",color:"#0B0E13",maxW:w*.9});if(ls[1])txt(c,ls[1],W/2,y+h*.73,{size:h*.21,weight:600,align:"center",color:"#2A3138",maxW:w*.9});}}
-function msgState(c,W,H,label,msg,sub){frame(c,W,H);eyebrow(c,W,H,label,"");const S=Math.min(W,H);txt(c,msg,W/2,H*.45,{size:S*.032,weight:800,align:"center",color:"#8A97A6",maxW:W*.82});if(sub)txt(c,sub,W/2,H*.52,{size:S*.022,weight:600,align:"center",color:"#5A6675",maxW:W*.82});}
+function msgState(c,W,H,label,msg,sub){frame(c,W,H);eyebrow(c,W,H,label,saison());const S=Math.min(W,H);txt(c,msg,W/2,H*.45,{size:S*.032,weight:800,align:"center",color:"#8A97A6",maxW:W*.82});if(sub)txt(c,sub,W/2,H*.52,{size:S*.022,weight:600,align:"center",color:"#5A6675",maxW:W*.82});}
 
 function drawErgebnis(c,W,H,sub,d){frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);const land=W/H>1.2,cx=W/2,S=Math.min(W,H);if(land){const my=H*.44;txt(c,d.heim,W*.20,my,{size:S*.05,weight:900,align:"center",baseline:"middle",maxW:W*.30,upper:true});txt(c,d.gast,W*.80,my,{size:S*.05,weight:900,align:"center",baseline:"middle",maxW:W*.30,upper:true});txt(c,`${d.ph} : ${d.pg}`,cx,my,{size:S*.12,weight:900,align:"center",baseline:"middle",color:css("--red")});txt(c,"vs",cx,my-S*.11,{size:S*.024,weight:700,align:"center",color:"#8A97A6",upper:true});txt(c,d.datum,cx,H*.60,{size:S*.026,weight:700,align:"center"});txt(c,d.ort,cx,H*.635,{size:S*.021,weight:600,align:"center",color:"#8A97A6"});}else{const y=H*.33;txt(c,d.heim,cx,y,{size:S*.058,weight:900,align:"center",maxW:W*.82,upper:true});txt(c,`${d.ph} : ${d.pg}`,cx,y+S*.16,{size:S*.185,weight:900,align:"center",color:css("--red")});txt(c,"vs",cx,y+S*.212,{size:S*.026,weight:700,align:"center",color:"#8A97A6",upper:true});txt(c,d.gast,cx,y+S*.27,{size:S*.058,weight:900,align:"center",maxW:W*.82,upper:true});txt(c,d.datum,cx,y+S*.35,{size:S*.026,weight:700,align:"center"});txt(c,d.ort,cx,y+S*.385,{size:S*.021,weight:600,align:"center",color:"#8A97A6"});}}
 function drawListe(c,W,H,title,sub,rows,mode){frame(c,W,H);eyebrow(c,W,H,title,sub);const S=Math.min(W,H),x=W*.09,w=W*.82;rows=rows.slice(0,W/H>1.2?4:6);const top=H*.24,rh=(H*.48)/Math.max(rows.length,1);rows.forEach((r,i)=>{const y=top+i*rh,hn=r.heim,gn=r.gast;c.fillStyle=i%2?"#161D26":"#1B232E";rr(c,x,y,w,rh*.86,10);c.fill();c.fillStyle=css("--red");rr(c,x+w*.02,y+rh*.20,w*.11,rh*.46,7);c.fill();txt(c,r.label,x+w*.075,y+rh*.53,{size:S*.024,weight:900,align:"center"});if(mode==="ergebnis"){txt(c,hn+"  –  "+gn,x+w*.17,y+rh*.55,{size:S*.022,weight:700,maxW:w*.5,upper:true});txt(c,r.score,x+w*.97,y+rh*.55,{size:S*.03,weight:900,align:"right",color:css("--red")});}else{txt(c,hn+"  –  "+gn,x+w*.17,y+rh*.44,{size:S*.022,weight:700,maxW:w*.6,upper:true});txt(c,r.datum,x+w*.17,y+rh*.70,{size:S*.017,weight:600,color:"#8A97A6"});txt(c,r.zeit,x+w*.97,y+rh*.53,{size:S*.03,weight:900,align:"right",color:css("--red")});}});}
@@ -238,7 +245,7 @@ function applyVisibility(){
 }
 
 async function render(){
-  if(startFehler){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social",startFehler,"Adresse mit ?kunde=… aufrufen, z. B. ?kunde=V002"));info(esc(startFehler));return;}
+  if(startFehler){const sub=document.querySelector(".top .sub");if(sub)sub.textContent=startFehler;drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social",startFehler,"Adresse mit ?kunde=… aufrufen, z. B. ?kunde=V002"));info(esc(startFehler));return;}
   if(!VEREIN){drawAll((c,W,H)=>msgState(c,W,H,"ONLANG Social","Lädt Vereinsdaten …",""));return;}
   if(source==="manuell"){renderManual();return;}
   const type=state.type;
@@ -253,7 +260,8 @@ async function render(){
       const rows=alle.filter(r=>r.mannschaft_id===t.id).sort((a,b)=>a.rang-b.rang)
         .map(r=>({pos:r.rang,team:(r.eigenes_team&&kurz())?kurz():r.team,mine:r.eigenes_team===true,sp:r.spiele,s:r.siege,n:r.niederlagen,pkt:r.punkte}));
       drawAll((c,W,H)=>drawTabelle(c,W,H,t.label+" · "+t.liga,rows));
-      info(`<b>${esc(t.label)}</b> · ${esc(t.liga)} · ${rows.length} Teams`);
+      const sp=await ladeAlleSpiele().catch(()=>[]);
+      info(`<b>${esc(t.label)}</b> · ${esc(t.liga)} · ${rows.length} Teams`+anbieterLinks(sp.filter(x=>x.mannschaft_id===t.id).map(x=>x.anbieter)));
     } else if(type==="termine"||type==="ergebnisse"){
       const merged=await loadSpiele(type);
       weeksMem=buildWeeks(merged);
@@ -265,7 +273,7 @@ async function render(){
         ?{label:x._label,heim:x._heim,gast:x._gast,datum:x._date,zeit:x._time}
         :{label:x._label,heim:x._heim,gast:x._gast,score:x._score});
       drawAll((c,W,H)=>drawListe(c,W,H,type==="termine"?T.termine:T.ergebnisse,wk.label,rows,type==="termine"?"termin":"ergebnis"));
-      info(`<b>${esc(wk.label)}</b> · ${rows.length} Spiele · ${weeksMem.length} Wochen live`);
+      info(`<b>${esc(wk.label)}</b> · ${rows.length} Spiele · ${weeksMem.length} Wochen live`+anbieterLinks(wk.items.map(x=>x.anbieter)));
     } else if(type==="ergebnis"){
       const merged=(await loadSpiele("ergebnisse")).slice().reverse();gamesMem=merged;fillGameSelect(gamesMem);
       const g=gamesMem[state.gameIdx];
@@ -273,7 +281,7 @@ async function render(){
       if(!heim.value||document.activeElement&&document.activeElement.id==="game")syncErgFromGame(g);
       if(!heim.value)syncErgFromGame(g);
       drawAll((c,W,H)=>drawErgebnis(c,W,H,(g._label||"")+" · "+(g._date||""),readErg()));
-      info(`<b>${esc(g._label)}</b> · ${esc(g._date)} · Endstand ${esc(g._score)}`);
+      info(`<b>${esc(g._label)}</b> · ${esc(g._date)} · Endstand ${esc(g._score)}`+anbieterLinks([g.anbieter]));
     }
   }catch(e){
     drawAll((c,W,H)=>msgState(c,W,H,"Fehler","Live-Daten nicht erreichbar.","Prüfe Verbindung. Details in der Konsole."));
@@ -293,7 +301,7 @@ team.addEventListener("change",()=>{state.teamIdx=+team.value;render();});
 refresh.addEventListener("click",()=>{for(const k in cache)delete cache[k];render();});
 Object.values(CV).forEach(cv=>cv.addEventListener("click",()=>{let u;try{u=cv.toDataURL("image/png");}catch(e){alert("Export blockiert: Ein Logo liegt auf einer Adresse, die den Bild-Export nicht erlaubt (z. B. imgur).");return;}const w=window.open();if(w)w.document.write('<img src="'+u+'" style="max-width:100%">');}));
 download.addEventListener("click",()=>{const nm={post:"post_1x1",story:"story_9x16",banner:"banner_16x9"};const tag=state.type||"start";
-  try{for(const k in CV){CV[k].toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${(KUNDE||"onlang").toLowerCase()}_${tag}_${nm[k]}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);},"image/png");}}catch(e){alert("Download blockiert: Ein Logo erlaubt den Bild-Export nicht.");}});
+  try{for(const k in CV){CV[k].toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${dateiName()}_${tag}_${nm[k]}.png`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);},"image/png");}}catch(e){alert("Download blockiert: Ein Logo erlaubt den Bild-Export nicht.");}});
 sponsor.addEventListener("change",()=>{sponsorIdx=+sponsor.value||0;render();});
 
 /* ===== Start: Verein und Sponsoren laden, Spiele und Tabellen erst bei Auswahl ===== */
