@@ -11,7 +11,7 @@
   img.logo{width:46px;height:46px;object-fit:contain;border-radius:9px;background:#fff;padding:4px}
   h1{font-size:20px;line-height:1.15;margin:0;font-weight:800}
   .sub{color:var(--muted);font-size:13px;line-height:1.2;margin:3px 0 0}
-  .demo-note{background:rgba(255,0,0,.10);border:1px solid rgba(255,0,0,.32);color:#ffd6d6;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:18px}
+  .demo-note{background:var(--surface);border:1px solid var(--line);color:#C9D1DB;border-radius:10px;padding:9px 12px;font-size:12.5px;margin-bottom:18px}
   .demo-note b{color:#fff}
   .layout{display:grid;grid-template-columns:340px 1fr;gap:22px;align-items:start}
   @media (max-width:900px){.layout{grid-template-columns:1fr}}
@@ -46,7 +46,7 @@
     <img class="logo" alt="" hidden>
     <div><h1>ONLANG Social</h1><div class="sub" data-t="laedtVerein">Lädt Vereinsdaten …</div></div>
   </div>
-  <div class="demo-note" data-th="hinweis"></div>
+  <div class="demo-note" id="hinweis" data-th="hinweis" hidden></div>
   <div class="layout">
     <div class="panel">
       <h2 data-t="einstellungen">Einstellungen</h2>
@@ -252,11 +252,18 @@ function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,ch=>({"&":"&amp;",
 
 /* ---- fetch + cache: ein Abruf je Quelle für den ganzen Verein ---- */
 const cache={};
+/* Hinweiskasten oben: nur sichtbar, wenn Supabase nicht erreichbar ist oder der manuelle Modus läuft */
+let verbindungFehlt=false;
+function hinweisZeigen(){hinweis.hidden=!(verbindungFehlt||source==="manuell");}
 async function sbGet(quelle,filter){
   if(!SUPABASE_KEY)throw new Error("SUPABASE_KEY fehlt (öffentlicher publishable Key).");
-  const r=await fetch(SUPABASE_URL+"/rest/v1/"+quelle+"?"+filter,{headers:{apikey:SUPABASE_KEY}});
-  if(!r.ok)throw new Error(quelle+": HTTP "+r.status);
-  const d=await r.json();
+  let d;
+  try{
+    const r=await fetch(SUPABASE_URL+"/rest/v1/"+quelle+"?"+filter,{headers:{apikey:SUPABASE_KEY}});
+    if(!r.ok)throw new Error(quelle+": HTTP "+r.status);
+    d=await r.json();
+  }catch(e){verbindungFehlt=true;hinweisZeigen();throw e;}
+  verbindungFehlt=false;hinweisZeigen();
   return Array.isArray(d)?d:[];
 }
 const kundenFilter=()=>"kunden_id=eq."+encodeURIComponent(KUNDE);
@@ -314,6 +321,14 @@ function einpassen(c,s,maxW,size,weight,minFaktor){s=String(s==null?"":s);let k=
   while(k>min&&breite(c,s,k,weight)>maxW)k--;
   if(breite(c,s,k,weight)>maxW){while(s.length>1&&breite(c,s+"…",k,weight)>maxW)s=s.slice(0,-1);s=s.replace(/[\s–-]+$/,"")+"…";}
   return {text:s,size:k};}
+/* Feste Schriftgröße der Team- und Gegnernamen je Format, als Anteil der kurzen Seite (1080 px) */
+const NAMEN_GROESSE={post:{einzel:.06,liste:.031,tabelle:.023},story:{einzel:.062,liste:.031,tabelle:.023},banner:{einzel:.06,liste:.034,tabelle:.026}};
+function format(W,H){const v=W/H;return v>1.2?"banner":v<.8?"story":"post";}
+function istKurzname(s){const k=kurz();return !!k&&String(s||"").trim().toLowerCase()===k.toLowerCase();}
+/* Name in fester Größe: passt er nicht, wird er mit "…" gekürzt. Der eigene Vereinsname wird nie gekürzt,
+   er wird nur im Notfall kleiner geschrieben. */
+function nameEinpassen(c,s,maxW,size,weight,eigen){s=String(s==null?"":s);if(!eigen)return einpassen(c,s,maxW,size,weight,1);
+  let k=Math.round(size);while(k>10&&breite(c,s,k,weight)>maxW)k--;return {text:s,size:k};}
 /* Text auf höchstens zwei Zeilen umbrechen; was nicht passt, wird mit "…" gekürzt */
 function zweiZeilen(c,s,maxW,size,weight){const worte=String(s||"").split(/\s+/).filter(Boolean),zeilen=[];let akt="";
   for(let i=0;i<worte.length;i++){const versuch=akt?akt+" "+worte[i]:worte[i];
@@ -385,11 +400,11 @@ function msgState(c,W,H,label,msg,sub){frame(c,W,H);eyebrow(c,W,H,label,saison()
    d: heim, gast, ph, pg, zeit (Zeile unter dem Spiel, z. B. Uhrzeit), ort, eigen ("heim"/"gast"/null), sieg (true/false/null) */
 function drawErgebnis(c,W,H,sub,d){frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);
   const m=masse(W,H),S=m.S,cx=W/2,hoehe=m.bot-m.top,mw=W*.82;
-  const name=Math.min(S*.062,hoehe*.115),wort=d.sieg==null?0:S*.028,stand=Math.min(S*.2,hoehe*.36),zeit=d.zeit?S*.03:0,ort=d.ort?S*.024:0;
+  const name=S*NAMEN_GROESSE[format(W,H)].einzel,wort=d.sieg==null?0:S*.028,stand=Math.min(S*.2,hoehe*.36),zeit=d.zeit?S*.03:0,ort=d.ort?S*.024:0;
   const hName=name*1.2,hWort=wort?wort*1.9:S*.012,hStand=stand*.98,hUnten=(zeit||ort)?S*.03+(zeit?zeit*1.35:0)+(ort?ort*1.35:0):0;
   let y=m.top+(hoehe-(hName*2+hWort+hStand+hUnten))/2;
   const farbeStand=d.sieg===false?GRAU_HELL:akzent();
-  const team=(text,eigen,yy)=>{const e=einpassen(c,String(text||"").toUpperCase(),mw,name,eigen?900:800,.6);
+  const team=(text,eigen,yy)=>{const e=nameEinpassen(c,String(text||"").toUpperCase(),mw,name,eigen?900:800,eigen||istKurzname(text));
     txt(c,e.text,cx,yy,{size:e.size,weight:eigen?900:800,align:"center",baseline:"middle",color:eigen?akzent():"#fff"});};
   team(d.heim,d.eigen==="heim",y+hName/2);y+=hName;
   if(wort)txt(c,d.sieg?T.sieg:T.niederlage,cx,y+hWort*.55,{size:wort,weight:900,align:"center",baseline:"middle",color:d.sieg?akzent():GRAU,spacing:5});
@@ -409,21 +424,24 @@ const TRENNER="  –  ";
 function namenMasse(c,r,size){const H=String(r.heim||"").toUpperCase(),G=String(r.gast||"").toUpperCase(),gh=r.eigen==="heim"?900:700,gg=r.eigen==="gast"?900:700;
   return {H,G,gh,gg,bh:breite(c,H,size,gh),bg:breite(c,G,size,gg),tb:breite(c,TRENNER,size,700)};}
 /* "HEIM – GAST" in einer Zeile, beide Namen in derselben Größe. Was nicht passt, wird mit "…" gekürzt. */
-function namenZeile(c,r,x,y,platz,size){const n=namenMasse(c,r,size),a=Math.max(platz-n.tb,10);let ph=a/2,pg=a/2;
-  if(n.bh<=ph)pg=a-n.bh;else if(n.bg<=pg)ph=a-n.bg;
-  const eh=einpassen(c,n.H,ph,size,n.gh,1),eg=einpassen(c,n.G,pg,size,n.gg,1);let px=x;
-  txt(c,eh.text,px,y,{size:size,weight:n.gh,baseline:"middle",color:r.eigen==="heim"?akzent():"#fff"});px+=breite(c,eh.text,size,n.gh);
+function namenZeile(c,r,x,y,platz,size){const n=namenMasse(c,r,size),a=Math.max(platz-n.tb,10),fh=r.eigen==="heim"||istKurzname(r.heim),fg=r.eigen==="gast"||istKurzname(r.gast);let ph=a/2,pg=a/2;
+  /* Der eigene Vereinsname bekommt seinen vollen Platz, der Gegner den Rest */
+  if(fh&&!fg){ph=Math.min(n.bh,a);pg=a-ph;}
+  else if(fg&&!fh){pg=Math.min(n.bg,a);ph=a-pg;}
+  else if(n.bh<=ph)pg=a-n.bh;else if(n.bg<=pg)ph=a-n.bg;
+  const eh=nameEinpassen(c,n.H,ph,size,n.gh,fh),eg=nameEinpassen(c,n.G,pg,size,n.gg,fg);let px=x;
+  txt(c,eh.text,px,y,{size:eh.size,weight:n.gh,baseline:"middle",color:r.eigen==="heim"?akzent():"#fff"});px+=breite(c,eh.text,eh.size,n.gh);
   txt(c,TRENNER,px,y,{size:size,weight:700,baseline:"middle",color:GRAU});px+=n.tb;
-  txt(c,eg.text,px,y,{size:size,weight:n.gg,baseline:"middle",color:r.eigen==="gast"?akzent():"#fff"});}
-function nameEinzeln(c,text,eigen,x,y,platz,size){const g=eigen?900:700,e=einpassen(c,String(text||"").toUpperCase(),platz,size,g,1);
-  txt(c,e.text,x,y,{size:size,weight:g,baseline:"middle",color:eigen?akzent():"#fff"});}
+  txt(c,eg.text,px,y,{size:eg.size,weight:n.gg,baseline:"middle",color:r.eigen==="gast"?akzent():"#fff"});}
+function nameEinzeln(c,text,eigen,x,y,platz,size){const g=eigen?900:700,e=nameEinpassen(c,String(text||"").toUpperCase(),platz,size,g,eigen||istKurzname(text));
+  txt(c,e.text,x,y,{size:e.size,weight:g,baseline:"middle",color:eigen?akzent():"#fff"});}
 function drawListe(c,W,H,title,sub,rows,mode,seite){
   const plan=listenPlan(W,H,rows.length),m=plan.m,S=m.S,x=m.x,w=m.w;seite=Math.min(seite||0,plan.seiten-1);
   frame(c,W,H);eyebrow(c,W,H,title,mitSeite(sub,seite,plan.seiten));
   const teil=rows.slice(seite*plan.pro,(seite+1)*plan.pro),n=Math.max(teil.length,1);
   /* Wenige Einträge: größere Zeilen, Block vertikal mittig */
   const rh=Math.min(plan.hoehe/n,n<=3?S*.22:S*.19),gross=rh>=S*.15,y0=m.top+(plan.hoehe-n*rh)/2,luft=Math.min(rh*.12,S*.016),bh=rh-luft;
-  const nameBasis=gross?Math.min(rh*.19,S*.044):Math.min(Math.max(rh*.25,S*.024),S*.034),zahlG=gross?Math.min(rh*.27,S*.06):Math.min(Math.max(rh*.3,S*.032),S*.046);
+  const zahlG=gross?Math.min(rh*.27,S*.06):Math.min(Math.max(rh*.3,S*.032),S*.046);
   const ew=Math.min(w*.11,S*.16),eh=Math.min(bh*.5,S*.085),ex=x+w*.02,tx=ex+ew+w*.03,rechts=x+w*.975;
   const abz=Math.min(bh*.42,gross?S*.062:S*.046);
   /* Platz für die Teamnamen je Zeile: bis zum Spielstand bzw. zur Uhrzeit */
@@ -431,8 +449,8 @@ function drawListe(c,W,H,title,sub,rows,mode,seite){
     if(mode==="ergebnis"){if(r.sieg!=null)links=rechts-abz-S*.022;links-=breite(c,r.score,zahlG,900)+S*.03;}
     else if(r.zeit)links=rechts-breite(c,r.zeit,zahlG,900)-S*.03;
     return links-tx;});
-  /* Feste, gut lesbare Schriftgröße für alle Teamnamen der Grafik. Namen, die damit nicht passen, werden mit "…" gekürzt. */
-  const nameG=nameBasis;
+  /* Feste Schriftgröße je Format für alle Teamnamen, unabhängig von der Zahl der Zeilen. Namen, die damit nicht passen, werden mit "…" gekürzt. */
+  const nameG=S*NAMEN_GROESSE[format(W,H)].liste;
   /* EINE Schriftgröße für alle Etiketten der Grafik: nach dem längsten Etikett */
   let etikettG=Math.round(Math.min(eh*.48,S*.03));
   while(etikettG>10&&teil.some(r=>breite(c,r.label,etikettG,900)>ew*.88))etikettG--;
@@ -466,7 +484,7 @@ function drawListe(c,W,H,title,sub,rows,mode,seite){
 function tabellenAusschnitt(rows,max){if(rows.length<=max)return {rows,bereich:""};
   const i=rows.findIndex(r=>r.mine===true),von=i<max?0:Math.min(Math.max(i-Math.floor(max/2),0),rows.length-max),teil=rows.slice(von,von+max);
   return {rows:teil,bereich:T.platzBereich(teil[0].pos,teil[teil.length-1].pos)};}
-function drawTabelle(c,W,H,sub,rows){const ausschnitt=tabellenAusschnitt(rows,W/H>1.2?6:8);if(ausschnitt.bereich)sub=(sub?sub+" · ":"")+ausschnitt.bereich;frame(c,W,H);eyebrow(c,W,H,T.tabelle,sub);const m=masse(W,H),S=m.S,x=m.x,w=m.w;rows=ausschnitt.rows;const top=m.top+S*.035,rh=(m.bot-top)/Math.max(rows.length,1),cP=x+w*.02,cT=x+w*.11,cSp=x+w*.70,cB=x+w*.82,cPk=x+w*.97,ky=top-S*.016;txt(c,"#",cP,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.team,cT,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.sp,cSp,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.sn,cB,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.pkt,cPk,ky,{size:S*.018,weight:800,align:"right",color:GRAU});rows.forEach((r,i)=>{const y=top+i*rh,mine=r.mine===true;c.fillStyle=mine?akzent():(i%2?"#161D26":"#1B232E");rr(c,x,y,w,rh*.84,9);c.fill();const mut=mine?aufAkzent():GRAU,fg=mine?aufAkzent():"#fff";txt(c,r.pos,cP,y+rh*.55,{size:S*.026,weight:900,color:fg});txt(c,r.team,cT,y+rh*.55,{size:S*.023,weight:mine?900:700,maxW:w*.54,upper:true,color:fg});txt(c,r.sp,cSp,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.s+"-"+r.n,cB,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.pkt,cPk,y+rh*.55,{size:S*.028,weight:900,align:"right",color:fg});});}
+function drawTabelle(c,W,H,sub,rows){const ausschnitt=tabellenAusschnitt(rows,W/H>1.2?6:8);if(ausschnitt.bereich)sub=(sub?sub+" · ":"")+ausschnitt.bereich;frame(c,W,H);eyebrow(c,W,H,T.tabelle,sub);const m=masse(W,H),S=m.S,x=m.x,w=m.w;rows=ausschnitt.rows;const top=m.top+S*.035,rh=(m.bot-top)/Math.max(rows.length,1),cP=x+w*.02,cT=x+w*.11,cSp=x+w*.70,cB=x+w*.82,cPk=x+w*.97,ky=top-S*.016;txt(c,"#",cP,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.team,cT,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.sp,cSp,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.sn,cB,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.pkt,cPk,ky,{size:S*.018,weight:800,align:"right",color:GRAU});rows.forEach((r,i)=>{const y=top+i*rh,mine=r.mine===true;c.fillStyle=mine?akzent():(i%2?"#161D26":"#1B232E");rr(c,x,y,w,rh*.84,9);c.fill();const mut=mine?aufAkzent():GRAU,fg=mine?aufAkzent():"#fff";txt(c,r.pos,cP,y+rh*.55,{size:S*.026,weight:900,color:fg});const tn=nameEinpassen(c,String(r.team||"").toUpperCase(),w*.54,S*NAMEN_GROESSE[format(W,H)].tabelle,mine?900:700,mine||istKurzname(r.team));txt(c,tn.text,cT,y+rh*.55,{size:tn.size,weight:mine?900:700,color:fg});txt(c,r.sp,cSp,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.s+"-"+r.n,cB,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.pkt,cPk,y+rh*.55,{size:S*.028,weight:900,align:"right",color:fg});});}
 
 /* ===== Steuerung ===== */
 const CV={post:cv_post,story:cv_story,banner:cv_banner};
@@ -521,6 +539,7 @@ function applyVisibility(){
  ergebnisFields.hidden=(t!=="ergebnis");
  manualListWrap.hidden=!(man&&(t==="ergebnisse"||t==="termine"||t==="tabelle"));
  if(refresh)refresh.style.display=man?"none":"";
+ hinweisZeigen();
  if(man)manualPlaceholders();
 }
 
