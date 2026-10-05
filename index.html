@@ -80,9 +80,11 @@
       <div id="manualListWrap" hidden>
         <label id="manualTitleLbl">Spielwoche / Titel</label>
         <input id="manualTitle" type="text" data-tp="manTitelPH" placeholder="z. B. 1. Spieltag">
+        <div id="manualRowsWrap">
         <label id="manualRowsLbl" data-t="manZeilenLbl">Zeilen (eine pro Spiel)</label>
         <textarea id="manualRows" rows="7"></textarea>
         <div class="hint" id="manualHint"></div>
+        </div>
       </div>
       <div class="ligainfo" id="ligainfo" data-t="infoStart">Wähle einen Grafik-Typ, um Live-Daten zu laden.</div>
       <div class="actions">
@@ -141,7 +143,7 @@ const TEXTE={
   exportBlockiert:"Export blockiert: Ein Logo liegt auf einer Adresse, die den Bild-Export nicht erlaubt (z. B. imgur).",
   downloadBlockiert:"Download blockiert: Ein Logo erlaubt den Bild-Export nicht.",
   manModus:"Manueller Modus",manKeineZeilen:"noch keine Zeilen",wortZeilen:"Zeilen",zeilenEingeben:"Zeilen eingeben …",
-  manHint:"Eine Zeile pro Eintrag · Felder mit <b>;</b> trennen.",manTitelPH:"z. B. 1. Spieltag",manZeilenLbl:"Zeilen (eine pro Spiel)",manuellTitel:"Manuell",
+  manHint:"Eine Zeile pro Eintrag · Felder mit <b>;</b> trennen.",manTitelPH:"z. B. 1. Spieltag",manZeilenLbl:"Zeilen (eine pro Spiel)",
   manFelder:{
    ergebnisse:{title:"Titel (z. B. Ergebnisse der Woche)",rows:"Mannschaft; Heim; Gast; Ergebnis",ex:"U18; SG RW Gierath; TG Neuss; 78:65"},
    termine:{title:"Spielwoche / Titel",rows:"Mannschaft; Heim; Gast; Datum; Uhrzeit",ex:"U18; SG RW Gierath; TG Neuss; 04.10.2026; 15:00"},
@@ -171,7 +173,7 @@ const TEXTE={
   exportBlockiert:"Az exportálás le van tiltva: az egyik logó olyan címen van, amely nem engedi a kép exportálását (pl. imgur).",
   downloadBlockiert:"A letöltés le van tiltva: az egyik logó nem engedi a kép exportálását.",
   manModus:"Kézi mód",manKeineZeilen:"még nincsenek sorok",wortZeilen:"sor",zeilenEingeben:"Sorok megadása …",
-  manHint:"Bejegyzésenként egy sor · a mezőket <b>;</b> választja el.",manTitelPH:"pl. 1. forduló",manZeilenLbl:"Sorok (mérkőzésenként egy)",manuellTitel:"Kézi",
+  manHint:"Bejegyzésenként egy sor · a mezőket <b>;</b> választja el.",manTitelPH:"pl. 1. forduló",manZeilenLbl:"Sorok (mérkőzésenként egy)",
   manFelder:{
    ergebnisse:{title:"Cím (pl. A hét eredményei)",rows:"Csapat; Hazai; Vendég; Eredmény",ex:"U18; Darazsak; MAFC; 78:65"},
    termine:{title:"Játékhét / cím",rows:"Csapat; Hazai; Vendég; Dátum; Időpont",ex:"U18; Darazsak; MAFC; 2026.10.04.; 15:00"},
@@ -201,7 +203,7 @@ const TEXTE={
   exportBlockiert:"Export blocked: a logo is hosted at an address that does not allow image export (e.g. imgur).",
   downloadBlockiert:"Download blocked: a logo does not allow image export.",
   manModus:"Manual mode",manKeineZeilen:"no rows yet",wortZeilen:"rows",zeilenEingeben:"Enter rows …",
-  manHint:"One row per entry · separate fields with <b>;</b>.",manTitelPH:"e.g. Matchday 1",manZeilenLbl:"Rows (one per game)",manuellTitel:"Manual",
+  manHint:"One row per entry · separate fields with <b>;</b>.",manTitelPH:"e.g. Matchday 1",manZeilenLbl:"Rows (one per game)",
   manFelder:{
    ergebnisse:{title:"Title (e.g. Results of the week)",rows:"Team; Home; Away; Score",ex:"U18; SG RW Gierath; TG Neuss; 78:65"},
    termine:{title:"Game week / title",rows:"Team; Home; Away; Date; Time",ex:"U18; SG RW Gierath; TG Neuss; 04/10/2026; 15:00"},
@@ -274,6 +276,8 @@ async function ladeVerein(){
 async function ladeSponsoren(){
   return sbGet("sponsoren",kundenFilter()+"&aktiv=eq.true&select=partner_name,logo_url,banner_text,position&order=position");
 }
+/* Ungarisch: ein Datum endet immer mit Punkt (2026.10.04.), auch wenn es von Hand ohne Punkt eingegeben wurde */
+function datumPunkt(s){s=String(s==null?"":s);return SPRACHE==="hu"?s.replace(/(\d{4}\.\s?\d{1,2}\.\s?\d{1,2})(?![.\d])/g,"$1."):s;}
 function datumTeile(d){const m=String(d||"").match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(!m)return{date:"",dt:null};
   return{date:T.datum(m[1],m[2],m[3]),dt:new Date(+m[1],+m[2]-1,+m[3])};}
@@ -369,7 +373,7 @@ function headerBrand(c,W,H){const m=masse(W,H),S=m.S,ph=m.kopfH,pad=S*.009,x=W*.
   const pw=iw+2*pad;c.save();c.shadowColor="rgba(0,0,0,.35)";c.shadowBlur=S*.015;c.shadowOffsetY=S*.004;c.fillStyle="#fff";rr(c,x,y,pw,ph,S*.018);c.fill();c.restore();
   if(LOGO.complete&&LOGO.naturalWidth)c.drawImage(LOGO,a.x,a.y,a.w,a.h,Math.round(x+pad),Math.round(y+(ph-hh)/2),Math.round(iw),Math.round(hh));
   return {tx:x+pw+S*.03,cy:y+ph/2};}
-function eyebrow(c,W,H,label,sub){const S=Math.min(W,H),b=headerBrand(c,W,H),tx=b.tx+S*.028,mw=W*.8-tx;c.fillStyle=akzent();rr(c,b.tx,b.cy-S*.03,S*.011,S*.06,3);c.fill();txt(c,label,tx,b.cy-S*.006,{size:S*.032,weight:900,spacing:2,upper:true,maxW:mw});txt(c,einpassen(c,sub||"",mw,S*.021,600,.8).text,tx,b.cy+S*.03,{size:S*.021,weight:600,color:GRAU,maxW:mw});}
+function eyebrow(c,W,H,label,sub){sub=datumPunkt(sub);const S=Math.min(W,H),b=headerBrand(c,W,H),tx=b.tx+S*.028,mw=W*.8-tx;c.fillStyle=akzent();rr(c,b.tx,b.cy-S*.03,S*.011,S*.06,3);c.fill();txt(c,label,tx,b.cy-S*.006,{size:S*.032,weight:900,spacing:2,upper:true,maxW:mw});txt(c,einpassen(c,sub||"",mw,S*.021,600,.8).text,tx,b.cy+S*.03,{size:S*.021,weight:600,color:GRAU,maxW:mw});}
 function mitSeite(sub,seite,n){return n>1?(sub?sub+" · ":"")+(seite+1)+"/"+n:sub;}
 
 /* Sponsorkasten: dunkel mit hellem Rand, Logo auf weißer Kachel, Text höchstens zwei Zeilen */
@@ -398,7 +402,7 @@ function msgState(c,W,H,label,msg,sub){frame(c,W,H);eyebrow(c,W,H,label,saison()
 
 /* ===== Einzelergebnis: Heim oben, Spielstand groß in der Mitte, Gast unten =====
    d: heim, gast, ph, pg, zeit (Zeile unter dem Spiel, z. B. Uhrzeit), ort, eigen ("heim"/"gast"/null), sieg (true/false/null) */
-function drawErgebnis(c,W,H,sub,d){frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);
+function drawErgebnis(c,W,H,sub,d){d=Object.assign({},d,{zeit:datumPunkt(d.zeit)});frame(c,W,H);eyebrow(c,W,H,T.endstand,sub);
   const m=masse(W,H),S=m.S,cx=W/2,hoehe=m.bot-m.top,mw=W*.82;
   const name=S*NAMEN_GROESSE[format(W,H)].einzel,wort=d.sieg==null?0:S*.028,stand=Math.min(S*.2,hoehe*.36),zeit=d.zeit?S*.03:0,ort=d.ort?S*.024:0;
   const hName=name*1.2,hWort=wort?wort*1.9:S*.012,hStand=stand*.98,hUnten=(zeit||ort)?S*.03+(zeit?zeit*1.35:0)+(ort?ort*1.35:0):0;
@@ -470,7 +474,7 @@ function drawListe(c,W,H,title,sub,rows,mode,seite){
       else namenZeile(c,r,tx,cy,p,nameG);
     }else{
       if(r.zeit)txt(c,r.zeit,rechts,cy,{size:zahlG,weight:900,align:"right",baseline:"middle",color:akzent()});
-      const zweite=r.zweite||"",kleinG=gross?Math.min(rh*.105,S*.026):Math.min(Math.max(rh*.16,S*.017),S*.021);
+      const zweite=datumPunkt(r.zweite),kleinG=gross?Math.min(rh*.105,S*.026):Math.min(Math.max(rh*.16,S*.017),S*.021);
       if(gross){const a=zweite?[.26,.52,.80]:[.33,.67];
         nameEinzeln(c,r.heim,r.eigen==="heim",tx,y+bh*a[0],p,nameG);nameEinzeln(c,r.gast,r.eigen==="gast",tx,y+bh*a[1],p,nameG);
         if(zweite)txt(c,einpassen(c,zweite,p,kleinG,600,1).text,tx,y+bh*a[2],{size:kleinG,weight:600,baseline:"middle",color:GRAU});}
@@ -518,17 +522,19 @@ function manLines(){return manualRows.value.split(/\r?\n/).map(function(s){retur
 function manErgebnisse(){return manLines().map(function(l){var c=cells(l);return{label:c[0]||"",heim:c[1]||"",gast:c[2]||"",score:c[3]||""};});}
 function manTermine(){return manLines().map(function(l){var c=cells(l);return{label:c[0]||"",heim:c[1]||"",gast:c[2]||"",datum:c[3]||"",zeit:c[4]||"",zweite:c[3]||""};});}
 function manTabelle(){return manLines().map(function(l){var c=cells(l);return{pos:c[0]||"",team:c[1]||"",sp:c[2]||"",s:c[3]||"",n:c[4]||"",pkt:c[5]||""};});}
-function manualPlaceholders(){var t=state.type||"ergebnis";if(t==="ergebnis")return;var p=T.manFelder[t];if(!p)return;manualTitleLbl.textContent=p.title;manualRows.placeholder=p.rows+"\n"+p.ex;manualHint.innerHTML=T.manHint;}
+/* Untertitel der Grafik im manuellen Modus: der eingegebene Titel, sonst die Saison – nie das Wort "Manuell" */
+function manTitel(){return (manualTitle.value||"").trim()||saison();}
+function manualPlaceholders(){var t=state.type||"ergebnis";if(t==="ergebnis"){manualTitleLbl.textContent=T.manFelder.termine.title;return;}var p=T.manFelder[t];if(!p)return;manualTitleLbl.textContent=p.title;manualRows.placeholder=p.rows+"\n"+p.ex;manualHint.innerHTML=T.manHint;}
 function typTitel(t){return t==="tabelle"?T.tabelle:t==="termine"?T.termine:t==="ergebnisse"?T.ergebnisse:T.typErgebnis;}
 function zeigeListe(titel,sub,rows,mode){drawAll((c,W,H,seite)=>drawListe(c,W,H,titel,sub,rows,mode,seite),(W,H)=>listenSeiten(W,H,rows.length));}
 function renderManual(){
  var t=state.type||"ergebnis";var title=(manualTitle.value||"").trim();
- if(t==="ergebnis"){drawAll(function(c,W,H){drawErgebnis(c,W,H,title||T.manuellTitel,readErg(null));});info(T.manModus+" · "+T.typErgebnis);return;}
+ if(t==="ergebnis"){drawAll(function(c,W,H){drawErgebnis(c,W,H,title||saison(),readErg(null));});info(T.manModus+" · "+T.typErgebnis);return;}
  var rows=t==="ergebnisse"?manErgebnisse():t==="termine"?manTermine():manTabelle();
  if(!rows.length){drawAll(function(c,W,H){msgState(c,W,H,typTitel(t),T.zeilenEingeben,T.manFelder[t]?T.manFelder[t].rows:"");});info(T.manModus+" · "+T.manKeineZeilen);return;}
- if(t==="ergebnisse")zeigeListe(T.ergebnisse,title||T.manuellTitel,rows,"ergebnis");
- else if(t==="termine")zeigeListe(T.termine,title||T.manuellTitel,rows,"termin");
- else drawAll(function(c,W,H){drawTabelle(c,W,H,title||T.manuellTitel,rows);});
+ if(t==="ergebnisse")zeigeListe(T.ergebnisse,title||saison(),rows,"ergebnis");
+ else if(t==="termine")zeigeListe(T.termine,title||saison(),rows,"termin");
+ else drawAll(function(c,W,H){drawTabelle(c,W,H,title||saison(),rows);});
  info(T.manModus+" · "+rows.length+" "+T.wortZeilen);
 }
 function applyVisibility(){
@@ -537,7 +543,8 @@ function applyVisibility(){
  weekWrap.hidden=man||!(t==="termine"||t==="ergebnisse");
  teamWrap.hidden=man||(t!=="tabelle");
  ergebnisFields.hidden=(t!=="ergebnis");
- manualListWrap.hidden=!(man&&(t==="ergebnisse"||t==="termine"||t==="tabelle"));
+ manualListWrap.hidden=!(man&&t);
+ manualRowsWrap.hidden=(t==="ergebnis");
  if(refresh)refresh.style.display=man?"none":"";
  hinweisZeigen();
  if(man)manualPlaceholders();
@@ -600,7 +607,7 @@ game.addEventListener("change",()=>{state.gameIdx=+game.value;syncErgFromGame(ga
 week.addEventListener("change",()=>{state.weekIdx=+week.value;state.seite=0;render();});
 team.addEventListener("change",()=>{state.teamIdx=+team.value;render();});
 page.addEventListener("change",()=>{state.seite=+page.value||0;zeichneAlle();});
-["heim","gast","ph","pg","datum","ort"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{if(state.type!=="ergebnis")return;if(source==="manuell"){drawAll((c,W,H)=>drawErgebnis(c,W,H,manualTitle.value||T.manuellTitel,readErg(null)));return;}var g=gamesMem[state.gameIdx]||{};drawAll((c,W,H)=>drawErgebnis(c,W,H,ergebnisKopf(g),readErg(g._eigen)));}));
+["heim","gast","ph","pg","datum","ort"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{if(state.type!=="ergebnis")return;if(source==="manuell"){drawAll((c,W,H)=>drawErgebnis(c,W,H,manTitel(),readErg(null)));return;}var g=gamesMem[state.gameIdx]||{};drawAll((c,W,H)=>drawErgebnis(c,W,H,ergebnisKopf(g),readErg(g._eigen)));}));
 refresh.addEventListener("click",()=>{for(const k in cache)delete cache[k];render();});
 Object.values(CV).forEach(cv=>cv.addEventListener("click",()=>{let u;try{u=cv.toDataURL("image/png");}catch(e){alert(T.exportBlockiert);return;}const w=window.open();if(w)w.document.write('<img src="'+u+'" style="max-width:100%">');}));
 /* Herunterladen: je Format alle Grafiken (bei mehreren mit "_1von2", "_2von2" im Namen) */
