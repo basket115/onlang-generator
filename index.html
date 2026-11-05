@@ -35,8 +35,8 @@
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
   .card .cap{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 9px;font-weight:700}
   canvas{display:block;border-radius:8px;background:#000;cursor:pointer}
-  .c-post canvas{width:360px;height:auto}.c-story canvas{width:220px;height:auto}.c-banner canvas{width:520px;height:auto}
-  @media (max-width:520px){.c-post canvas{width:260px}.c-story canvas{width:160px}.c-banner canvas{width:320px}}
+  .c-post canvas{width:360px;height:auto}.c-post45 canvas{width:300px;height:auto}.c-story canvas{width:220px;height:auto}.c-banner canvas{width:520px;height:auto}
+  @media (max-width:520px){.c-post canvas{width:260px}.c-post45 canvas{width:220px}.c-story canvas{width:160px}.c-banner canvas{width:320px}}
   .previews .tip{width:100%;font-size:12px;color:var(--muted);margin:-4px 0 0}
   textarea{width:100%;background:var(--surface2);border:1px solid var(--line);color:#fff;border-radius:9px;padding:9px 10px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace;resize:vertical;line-height:1.5}
   textarea:focus{outline:2px solid var(--red);outline-offset:1px;border-color:transparent}
@@ -94,6 +94,7 @@
     </div>
     <div class="previews">
       <p class="tip" data-t="tipp">Tipp: Vorschau anklicken öffnet die echte Auflösung (1080 px) im neuen Tab.</p>
+      <div class="card c-post45"><p class="cap">Post 4:5 · Instagram</p><canvas id="cv_post45" width="1080" height="1350"></canvas></div>
       <div class="card c-post"><p class="cap">Post 1:1</p><canvas id="cv_post" width="1080" height="1080"></canvas></div>
       <div class="card c-story"><p class="cap">Story 9:16</p><canvas id="cv_story" width="1080" height="1920"></canvas></div>
       <div class="card c-banner"><p class="cap">Banner 16:9</p><canvas id="cv_banner" width="1920" height="1080"></canvas></div>
@@ -347,7 +348,8 @@ function splitLines(s){s=String(s||"");var o=[];s.split("\n").forEach(function(a
 function masse(W,H){const S=Math.min(W,H),kopfY=H*.055,kopfH=S*.12,sH=S*.105,sY=H*.955-S*.032-sH,sLabelY=sY-S*.022;
   return {S,kopfY,kopfH,sH,sY,sLabelY,x:W*.09,w:W*.82,top:kopfY+kopfH+S*.04,bot:sLabelY-S*.045};}
 
-function frame(c,W,H){const S=Math.min(W,H);c.fillStyle="#0B0E13";c.fillRect(0,0,W,H);c.fillStyle="#10151C";rr(c,W*.045,H*.045,W*.91,H*.91,S*.03);c.fill();c.save();c.fillStyle=akzent();c.beginPath();c.moveTo(W,0);c.lineTo(W,H*.12);c.lineTo(W*.83,0);c.closePath();c.fill();c.restore();drawSponsors(c,W,H);}
+let RAHMEN_FERTIG=false; /* true = Hintergrund, Karte und Ecke stehen schon (Post 4:5) */
+function frame(c,W,H){if(RAHMEN_FERTIG){drawSponsors(c,W,H);return;}const S=Math.min(W,H);c.fillStyle="#0B0E13";c.fillRect(0,0,W,H);c.fillStyle="#10151C";rr(c,W*.045,H*.045,W*.91,H*.91,S*.03);c.fill();c.save();c.fillStyle=akzent();c.beginPath();c.moveTo(W,0);c.lineTo(W,H*.12);c.lineTo(W*.83,0);c.closePath();c.fill();c.restore();drawSponsors(c,W,H);}
 
 /* Vereinslogo: leeren (weißen oder durchsichtigen) Rand im Bild wegschneiden, damit das Logo den Kasten füllt */
 let logoAusschnitt=null;
@@ -491,17 +493,32 @@ function tabellenAusschnitt(rows,max){if(rows.length<=max)return {rows,bereich:"
 function drawTabelle(c,W,H,sub,rows){const ausschnitt=tabellenAusschnitt(rows,W/H>1.2?6:8);if(ausschnitt.bereich)sub=(sub?sub+" · ":"")+ausschnitt.bereich;frame(c,W,H);eyebrow(c,W,H,T.tabelle,sub);const m=masse(W,H),S=m.S,x=m.x,w=m.w;rows=ausschnitt.rows;const top=m.top+S*.035,rh=(m.bot-top)/Math.max(rows.length,1),cP=x+w*.02,cT=x+w*.11,cSp=x+w*.70,cB=x+w*.82,cPk=x+w*.97,ky=top-S*.016;txt(c,"#",cP,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.team,cT,ky,{size:S*.018,weight:800,color:GRAU});txt(c,T.sp,cSp,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.sn,cB,ky,{size:S*.018,weight:800,align:"center",color:GRAU});txt(c,T.pkt,cPk,ky,{size:S*.018,weight:800,align:"right",color:GRAU});rows.forEach((r,i)=>{const y=top+i*rh,mine=r.mine===true;c.fillStyle=mine?akzent():(i%2?"#161D26":"#1B232E");rr(c,x,y,w,rh*.84,9);c.fill();const mut=mine?aufAkzent():GRAU,fg=mine?aufAkzent():"#fff";txt(c,r.pos,cP,y+rh*.55,{size:S*.026,weight:900,color:fg});const tn=nameEinpassen(c,String(r.team||"").toUpperCase(),w*.54,S*NAMEN_GROESSE[format(W,H)].tabelle,mine?900:700,mine||istKurzname(r.team));txt(c,tn.text,cT,y+rh*.55,{size:tn.size,weight:mine?900:700,color:fg});txt(c,r.sp,cSp,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.s+"-"+r.n,cB,y+rh*.55,{size:S*.023,weight:700,align:"center",color:mut});txt(c,r.pkt,cPk,y+rh*.55,{size:S*.028,weight:900,align:"right",color:fg});});}
 
 /* ===== Steuerung ===== */
-const CV={post:cv_post,story:cv_story,banner:cv_banner};
+const CV={post45:cv_post45,post:cv_post,story:cv_story,banner:cv_banner};
+/* Post 4:5 für Instagram (1080 × 1350): Hintergrund, Karte und Ecke über die
+   ganze Höhe, der Inhalt (Logo, Ergebnis, Sponsor) genau wie im Post 1:1 im
+   mittleren Quadrat. Dieses Quadrat ist der Schutzrand: Das Profilraster von
+   Instagram zeigt je nach Ansicht nur die Mitte (1:1, oben und unten je
+   135 px weg) oder 3:4 (links und rechts je 34 px weg) – beides schneidet
+   nichts Wichtiges ab. */
+const POST45_RAND=135;
+function innenMass(k,W,H){return k==="post45"?{W,H:H-2*POST45_RAND}:{W,H};}
+function zeichneFormat(k,c,W,H,seite){
+  if(k!=="post45"){grafik.zeichne(c,W,H,seite);return;}
+  const S=W;c.fillStyle="#0B0E13";c.fillRect(0,0,W,H);c.fillStyle="#10151C";rr(c,W*.045,S*.045,W*.91,H-S*.09,S*.03);c.fill();
+  c.save();c.fillStyle=akzent();c.beginPath();c.moveTo(W,0);c.lineTo(W,S*.12);c.lineTo(W*.83,0);c.closePath();c.fill();c.restore();
+  const i=innenMass(k,W,H);c.save();c.translate(0,POST45_RAND);RAHMEN_FERTIG=true;
+  try{grafik.zeichne(c,i.W,i.H,seite);}finally{RAHMEN_FERTIG=false;c.restore();}
+}
 let state={type:null,weekIdx:0,teamIdx:0,gameIdx:0,seite:0};
 let weeksMem=[],gamesMem=[],teamsMem=[],weekFrisch=true;
 /* Aktuelle Grafik: zeichne(c,W,H,seite) und seiten(W,H) = Anzahl der Grafiken in diesem Format */
 let grafik={zeichne:()=>{},seiten:()=>1};
-function seitenVon(k){return Math.max(1,grafik.seiten(CV[k].width,CV[k].height));}
+function seitenVon(k){const i=innenMass(k,CV[k].width,CV[k].height);return Math.max(1,grafik.seiten(i.W,i.H));}
 function zeichneAlle(){
   let max=1;for(const k in CV)max=Math.max(max,seitenVon(k));
   if(state.seite>=max)state.seite=0;
   fillPageSelect(max);
-  for(const k in CV){const cv=CV[k],c=cv.getContext("2d");c.clearRect(0,0,cv.width,cv.height);grafik.zeichne(c,cv.width,cv.height,Math.min(state.seite,seitenVon(k)-1));}
+  for(const k in CV){const cv=CV[k],c=cv.getContext("2d");c.clearRect(0,0,cv.width,cv.height);zeichneFormat(k,c,cv.width,cv.height,Math.min(state.seite,seitenVon(k)-1));}
 }
 function drawAll(zeichne,seiten){grafik={zeichne,seiten:seiten||(()=>1)};zeichneAlle();}
 function info(h){document.getElementById("ligainfo").innerHTML=h;}
@@ -611,9 +628,9 @@ page.addEventListener("change",()=>{state.seite=+page.value||0;zeichneAlle();});
 refresh.addEventListener("click",()=>{for(const k in cache)delete cache[k];render();});
 Object.values(CV).forEach(cv=>cv.addEventListener("click",()=>{let u;try{u=cv.toDataURL("image/png");}catch(e){alert(T.exportBlockiert);return;}const w=window.open();if(w)w.document.write('<img src="'+u+'" style="max-width:100%">');}));
 /* Herunterladen: je Format alle Grafiken (bei mehreren mit "_1von2", "_2von2" im Namen) */
-download.addEventListener("click",()=>{const nm={post:"post_1x1",story:"story_9x16",banner:"banner_16x9"};const tag=state.type||"start";let nr=0;
+download.addEventListener("click",()=>{const nm={post45:"post_4x5",post:"post_1x1",story:"story_9x16",banner:"banner_16x9"};const tag=state.type||"start";let nr=0;
   try{for(const k in CV){const n=seitenVon(k);for(let p=0;p<n;p++){
-    const cv=document.createElement("canvas");cv.width=CV[k].width;cv.height=CV[k].height;grafik.zeichne(cv.getContext("2d"),cv.width,cv.height,p);
+    const cv=document.createElement("canvas");cv.width=CV[k].width;cv.height=CV[k].height;zeichneFormat(k,cv.getContext("2d"),cv.width,cv.height,p);
     const name=`${dateiName()}_${tag}_${nm[k]}${n>1?`_${p+1}von${n}`:""}.png`;
     setTimeout(()=>{try{cv.toBlob(b=>{const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);},"image/png");}catch(e){alert(T.downloadBlockiert);}},nr++*350);
   }}}catch(e){alert(T.downloadBlockiert);}});
