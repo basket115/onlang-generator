@@ -111,6 +111,7 @@ const PARAMETER=new URLSearchParams(location.search);
 const KUNDE=(PARAMETER.get("kunde")||"").trim().toUpperCase();
 const LANG_PARAMETER=(PARAMETER.get("lang")||"").trim().toLowerCase();
 let VEREIN=null;      /* Zeile aus kunden */
+let FUSSBALL=false; /* Sportart des Vereins (kunden.sportarten): Tore statt Punkte (25.11.2026) */
 let SPONSOREN=[];     /* aktive Sponsoren, sortiert nach position */
 let sponsorIdx=0;
 let startFehler=null; /* Funktion, die die Fehlermeldung in der aktuellen Sprache liefert */
@@ -130,7 +131,7 @@ const TEXTE={
   typErgebnis:"Ergebnis",typErgebnisse:"Ergebnisse",typTermine:"Termine",typTabelle:"Tabelle",
   spiel:"Spiel",spielwoche:"Spielwoche",wocheHinweis:"Alle Mannschaften dieser Woche auf einem Blatt.",mannschaft:"Mannschaft",
   seite:"Seite",seiteHinweis:"Zu viele Einträge für eine Grafik – sie werden auf mehrere verteilt.",sponsor:"Sponsor",
-  heimteam:"Heimteam",gastteam:"Gastteam",punkteHeim:"Punkte Heim",punkteGast:"Punkte Gast",datumFeld:"Datum / Uhrzeit",ort:"Ort",
+  heimteam:"Heimteam",gastteam:"Gastteam",punkteHeim:"Punkte Heim",punkteGast:"Punkte Gast",toreHeim:"Tore Heim",toreGast:"Tore Gast",datumFeld:"Datum / Uhrzeit",ort:"Ort",
   infoStart:"Wähle einen Grafik-Typ, um Live-Daten zu laden.",neuLaden:"Neu laden",download:"Alle Formate herunterladen",
   tipp:"Tipp: Vorschau anklicken öffnet die echte Auflösung (1080 px) im neuen Tab.",
   keine:"– keine –",keinSponsor:"– kein aktiver Sponsor –",
@@ -160,7 +161,7 @@ const TEXTE={
   typErgebnis:"Eredmény",typErgebnisse:"Eredmények",typTermine:"Mérkőzések",typTabelle:"Tabella",
   spiel:"Mérkőzés",spielwoche:"Játékhét",wocheHinweis:"A hét összes csapata egy lapon.",mannschaft:"Csapat",
   seite:"Oldal",seiteHinweis:"Túl sok bejegyzés egy grafikához – több grafikára kerülnek.",sponsor:"Támogató",
-  heimteam:"Hazai csapat",gastteam:"Vendégcsapat",punkteHeim:"Hazai pontok",punkteGast:"Vendég pontok",datumFeld:"Dátum / időpont",ort:"Helyszín",
+  heimteam:"Hazai csapat",gastteam:"Vendégcsapat",punkteHeim:"Hazai pontok",punkteGast:"Vendég pontok",toreHeim:"Hazai gólok",toreGast:"Vendég gólok",datumFeld:"Dátum / időpont",ort:"Helyszín",
   infoStart:"Válassz grafikatípust az élő adatok betöltéséhez.",neuLaden:"Újratöltés",download:"Összes formátum letöltése",
   tipp:"Tipp: az előnézetre kattintva a valódi felbontás (1080 px) új lapon nyílik meg.",
   keine:"– nincs –",keinSponsor:"– nincs aktív támogató –",
@@ -190,7 +191,7 @@ const TEXTE={
   typErgebnis:"Result",typErgebnisse:"Results",typTermine:"Fixtures",typTabelle:"Standings",
   spiel:"Game",spielwoche:"Game week",wocheHinweis:"All teams of this week on one sheet.",mannschaft:"Team",
   seite:"Page",seiteHinweis:"Too many entries for one graphic – they are spread over several.",sponsor:"Sponsor",
-  heimteam:"Home team",gastteam:"Away team",punkteHeim:"Home points",punkteGast:"Away points",datumFeld:"Date / time",ort:"Venue",
+  heimteam:"Home team",gastteam:"Away team",punkteHeim:"Home points",punkteGast:"Away points",toreHeim:"Home goals",toreGast:"Away goals",datumFeld:"Date / time",ort:"Venue",
   infoStart:"Choose a graphic type to load live data.",neuLaden:"Reload",download:"Download all formats",
   tipp:"Tip: click a preview to open the real resolution (1080 px) in a new tab.",
   keine:"– none –",keinSponsor:"– no active sponsor –",
@@ -219,10 +220,13 @@ function setzeSprache(vereinsSprache){
   T=TEXTE[SPRACHE];
   texteAnwenden();
 }
+/* Fußball: diese Beschriftungen heißen "Tore" statt "Punkte" */
+const TORE_STATT_PUNKTE={punkteHeim:"toreHeim",punkteGast:"toreGast"};
+function istFussball(sportarten){return (Array.isArray(sportarten)?sportarten:[]).some(s=>/fu(ß|ss)ball|football|soccer|labdarúgás|labdarugas|foci/i.test(String(s)));}
 /* Schreibt die Texte des Wörterbuchs in die Seite (data-t = Text, data-th = HTML, data-tp = Platzhalter) */
 function texteAnwenden(){
   document.documentElement.lang=SPRACHE;
-  document.querySelectorAll("[data-t]").forEach(e=>{if(e.id==="ligainfo"&&state.type)return;if(e.dataset.t==="laedtVerein"&&VEREIN)return;e.textContent=T[e.dataset.t];});
+  document.querySelectorAll("[data-t]").forEach(e=>{if(e.id==="ligainfo"&&state.type)return;if(e.dataset.t==="laedtVerein"&&VEREIN)return;const k=FUSSBALL&&T[TORE_STATT_PUNKTE[e.dataset.t]]?TORE_STATT_PUNKTE[e.dataset.t]:e.dataset.t;e.textContent=T[k];});
   document.querySelectorAll("[data-th]").forEach(e=>{e.innerHTML=T[e.dataset.th];});
   document.querySelectorAll("[data-tp]").forEach(e=>{e.placeholder=T[e.dataset.tp];});
 }
@@ -271,7 +275,7 @@ async function sbGet(quelle,filter){
 }
 const kundenFilter=()=>"kunden_id=eq."+encodeURIComponent(KUNDE);
 async function ladeVerein(){
-  const rows=await sbGet("kunden",kundenFilter()+"&select=kunden_id,verein_name,short_name,thema_farbe,akzent_farbe,logo_verein,sprache");
+  const rows=await sbGet("kunden",kundenFilter()+"&select=kunden_id,verein_name,short_name,thema_farbe,akzent_farbe,logo_verein,sprache,sportarten");
   return rows[0]||null;
 }
 async function ladeSponsoren(){
@@ -565,7 +569,7 @@ function manTermine(){return manLines().map(function(l){var c=cells(l);return{la
 function manTabelle(){return manLines().map(function(l){var c=cells(l);return{pos:c[0]||"",team:c[1]||"",sp:c[2]||"",s:c[3]||"",n:c[4]||"",pkt:c[5]||""};});}
 /* Untertitel der Grafik im manuellen Modus: der eingegebene Titel, sonst die Saison – nie das Wort "Manuell" */
 function manTitel(){return (manualTitle.value||"").trim()||saison();}
-function manualPlaceholders(){var t=state.type||"ergebnis";if(t==="ergebnis"){manualTitleLbl.textContent=T.manFelder.termine.title;return;}var p=T.manFelder[t];if(!p)return;manualTitleLbl.textContent=p.title;manualRows.placeholder=p.rows+"\n"+p.ex;manualHint.innerHTML=T.manHint;}
+function manualPlaceholders(){var t=state.type||"ergebnis";if(t==="ergebnis"){manualTitleLbl.textContent=T.manFelder.termine.title;return;}var p=T.manFelder[t];if(!p)return;manualTitleLbl.textContent=p.title;manualRows.placeholder=p.rows+"\n"+(FUSSBALL?String(p.ex).replace(/78:65/g,"2:1").replace(/78–65/g,"2–1"):p.ex);manualHint.innerHTML=T.manHint;}
 function typTitel(t){return t==="tabelle"?T.tabelle:t==="termine"?T.termine:t==="ergebnisse"?T.ergebnisse:T.typErgebnis;}
 function zeigeListe(titel,sub,rows,mode){drawAll((c,W,H,seite)=>drawListe(c,W,H,titel,sub,rows,mode,seite),(W,H)=>listenSeiten(W,H,rows.length));}
 function renderManual(){
@@ -685,7 +689,7 @@ async function start(){
   try{
     const v=await ladeVerein();
     if(!v){startFehler=()=>T.vereinNichtGefunden(KUNDE);render();return;}
-    VEREIN=v;zeigeVerein();
+    VEREIN=v;FUSSBALL=istFussball(v.sportarten);if(FUSSBALL){texteAnwenden();applyVisibility();}zeigeVerein();
     SPONSOREN=await ladeSponsoren().catch(e=>{console.error(e);return [];});
     fillSponsorSelect();
   }catch(e){startFehler=()=>T.vereinNichtErreichbar;console.error(e);}
